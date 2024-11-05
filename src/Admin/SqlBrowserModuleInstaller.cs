@@ -60,9 +60,13 @@ internal class SqlBrowserModuleInstaller
         formInfo.AddFormItem(formItem);
         SetFormDefinition(info, formInfo);
 
-        if (info.HasChanged)
+        if (info.ClassID == 0)
         {
-            DataClassInfoProvider.SetDataClassInfo(info);
+            info.Insert();
+        }
+        else if (info.HasChanged)
+        {
+            info.Update();
         }
 
         return info;
