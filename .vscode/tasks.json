@@ -1,0 +1,49 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": ".NET: build (Solution)",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": ".NET: rebuild (Solution)",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "--no-incremental",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": ".NET: clean (Solution)",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "clean",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": ".NET: format (Tasks)",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["format", "Labs.Kentico.Xperience.Tasks.csproj"],
+      "problemMatcher": "$msCompile",
+      "options": {
+        "cwd": "${workspaceFolder}/src/Kentico.Xperience.Tasks"
+      }
+    },
+  ]
+}

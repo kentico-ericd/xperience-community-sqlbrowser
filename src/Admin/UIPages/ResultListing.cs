@@ -1,0 +1,132 @@
+﻿using CMS.Base;
+using CMS.Core;
+using CMS.Helpers;
+
+using Kentico.Xperience.Admin.Base;
+
+using XperienceCommunity.SqlBrowser.Enum;
+using XperienceCommunity.SqlBrowser.Services;
+
+namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
+[UINavigation(false)]
+public class ResultListing : DataContainerListingPage
+{
+    private readonly IEventLogService eventLogService;
+    private readonly ISqlBrowserResultProvider sqlBrowserQueryProvider;
+    private readonly ISqlBrowserExporter sqlBrowserExporter;
+
+
+    public ResultListing(
+        ISqlBrowserResultProvider sqlBrowserQueryProvider,
+        ISqlBrowserExporter sqlBrowserExporter,
+        IEventLogService eventLogService)
+    {
+        this.eventLogService = eventLogService;
+        this.sqlBrowserExporter = sqlBrowserExporter;
+        this.sqlBrowserQueryProvider = sqlBrowserQueryProvider;
+    }
+
+
+    public override Task ConfigurePage()
+    {
+        if (!sqlBrowserQueryProvider.GetColumnNames().Any())
+        {
+            PageConfiguration.Callouts = [
+                new CalloutConfiguration
+                {
+                    Headline = "Error loading data",
+                    Content = "Query result has no data, please check the Event log for errors",
+                    Placement = CalloutPlacement.OnPaper,
+                    Type = CalloutType.FriendlyWarning
+                }];
+        }
+        else
+        {
+            ConfigureColumns();
+            PageConfiguration.Caption = "Results";
+            PageConfiguration.HeaderActions.AddCommand("Export to CSV", nameof(ExportToCsv));
+            PageConfiguration.HeaderActions.AddCommand("Export to Excel", nameof(ExportToXls));
+            PageConfiguration.AddEditRowAction<ViewRecord>();
+        }
+
+        return base.ConfigurePage();
+    }
+
+
+    [PageCommand]
+    public Task<ICommandResponse> ExportToCsv() => Export(SqlBrowserExportType.Csv);
+
+
+    [PageCommand]
+    public Task<ICommandResponse> ExportToXls() => Export(SqlBrowserExportType.Excel);
+
+
+    [PageCommand]
+    public Task<ICommandResponse<RowActionResult>> ViewRecord(int id)
+    {
+        string recordText = sqlBrowserQueryProvider.GetRowAsText(id);
+
+        return Task.FromResult(ResponseFrom(new RowActionResult(false)).AddSuccessMessage(recordText));
+    }
+
+
+    protected override object GetIdentifier(IDataContainer dataContainer) =>
+        ValidationHelper.GetInteger(dataContainer[SqlBrowserResultProvider.ROW_IDENTIFIER_COLUMN], -1);
+
+
+    protected override Task<IEnumerable<IDataContainer>> LoadDataContainers(CancellationToken cancellationToken)
+    {
+        var containers = sqlBrowserQueryProvider.GetRowsAsDataContainer();
+        if (containers is null)
+        {
+            return Task.FromResult(Enumerable.Empty<IDataContainer>());
+        }
+
+        return Task.FromResult(containers);
+    }
+
+
+    private void ConfigureColumns()
+    {
+        var columnNames = sqlBrowserQueryProvider.GetColumnNames();
+        // Get largest header length to set all column min width- avoids text jumbling
+        int columnMinWidth = Math.Ceiling(columnNames.Max(col => col.Length) * 0.7).ToInteger();
+        foreach (string col in columnNames)
+        {
+            PageConfiguration.ColumnConfigurations.AddColumn(col, col, minWidth: columnMinWidth);
+        }
+    }
+
+
+    private async Task<ICommandResponse> Export(SqlBrowserExportType exportType)
+    {
+        string? exportedPath = null;
+        try
+        {
+            switch (exportType)
+            {
+                case SqlBrowserExportType.Csv:
+                    exportedPath = await sqlBrowserExporter.ExportToCsv();
+                    break;
+                case SqlBrowserExportType.Excel:
+                    exportedPath = await sqlBrowserExporter.ExportToXls();
+                    break;
+                default:
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            eventLogService.LogException(nameof(ResultListing), nameof(Export), ex);
+        }
+
+        if (!string.IsNullOrEmpty(exportedPath))
+        {
+            return Response().AddSuccessMessage($"Exported results to {exportedPath}");
+        }
+        else
+        {
+            return Response().AddErrorMessage("Export failed, please check the Event log for errors");
+        }
+    }
+}

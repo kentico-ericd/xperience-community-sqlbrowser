@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<AdminOrgName>xperiencecommunity</AdminOrgName>
+		<RootNamespace>XperienceCommunity.SqlBrowser</RootNamespace>
+		<NoWarn>$(NoWarn);S1075</NoWarn>
+		<LangVersion>latest</LangVersion>
+
+		<!-- Required to prevent type conflicts with existing types -->
+		<HotChocolateImplicitUsings>disable</HotChocolateImplicitUsings>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="CMS.AssemblyDiscoverableAttribute"></AssemblyAttribute>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CsvHelper" />
+		<PackageReference Include="Kentico.Xperience.WebApp" />
+		<PackageReference Include="Kentico.Xperience.Admin" />
+		<PackageReference Include="NPOI" />
+	</ItemGroup>
+</Project>
