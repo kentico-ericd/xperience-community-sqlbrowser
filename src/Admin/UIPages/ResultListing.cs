@@ -8,6 +8,10 @@ using XperienceCommunity.SqlBrowser.Enum;
 using XperienceCommunity.SqlBrowser.Services;
 
 namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
+
+/// <summary>
+/// Listing UI page which displays the results of a SQL query.
+/// </summary>
 [UINavigation(false)]
 public class ResultListing : DataContainerListingPage
 {

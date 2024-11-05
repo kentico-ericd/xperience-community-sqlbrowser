@@ -5,6 +5,10 @@ using XperienceCommunity.SqlBrowser.Infos;
 using XperienceCommunity.SqlBrowser.Services;
 
 namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
+
+/// <summary>
+/// Create UI page for creating <see cref="SqlBrowserQueryInfo"/> objects. 
+/// </summary>
 [UINavigation(false)]
 public class SqlBrowserQueryInfoCreate : CreatePage<SqlBrowserQueryInfo, ResultListing>
 {

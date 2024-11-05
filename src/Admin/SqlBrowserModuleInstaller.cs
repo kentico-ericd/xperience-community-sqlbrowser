@@ -6,6 +6,10 @@ using XperienceCommunity.SqlBrowser.Admin.UIPages;
 using XperienceCommunity.SqlBrowser.Infos;
 
 namespace XperienceCommunity.SqlBrowser.Admin;
+
+/// <summary>
+/// Installs and updates objects required by the SQL browser module during application startup.
+/// </summary>
 internal class SqlBrowserModuleInstaller
 {
     private readonly IInfoProvider<ResourceInfo> resourceProvider;
@@ -14,6 +18,9 @@ internal class SqlBrowserModuleInstaller
     public SqlBrowserModuleInstaller(IInfoProvider<ResourceInfo> resourceProvider) => this.resourceProvider = resourceProvider;
 
 
+    /// <summary>
+    /// Updates module objects.
+    /// </summary>
     public void Install()
     {
         var resource = resourceProvider.Get(SqlBrowserApplicationPage.IDENTIFIER)

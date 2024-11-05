@@ -10,6 +10,10 @@ using XperienceCommunity.SqlBrowser.Admin.UIPages;
 using XperienceCommunity.SqlBrowser.Infos;
 
 namespace XperienceCommunity.SqlBrowser.Services;
+
+/// <summary>
+/// Default implementation of <see cref="ISqlBrowserResultProvider"/>.
+/// </summary>
 public class SqlBrowserResultProvider : ISqlBrowserResultProvider
 {
     private DataSet? result;

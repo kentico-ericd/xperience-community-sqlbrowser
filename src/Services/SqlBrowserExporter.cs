@@ -8,6 +8,10 @@ using NPOI.XSSF.UserModel;
 using System.Globalization;
 
 namespace XperienceCommunity.SqlBrowser.Services;
+
+/// <summary>
+/// Default implementation of <see cref="ISqlBrowserExporter"/>.
+/// </summary>
 public class SqlBrowserExporter : ISqlBrowserExporter
 {
     private readonly ISqlBrowserResultProvider sqlBrowserResultProvider;

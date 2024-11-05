@@ -7,6 +7,10 @@ using Kentico.Xperience.Admin.Base.Forms;
 using XperienceCommunity.SqlBrowser.Services;
 
 namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
+
+/// <summary>
+/// Edit UI page which displays a database record in a dialog window.
+/// </summary>
 [UIPageLocation(PageLocationEnum.Dialog)]
 [UINavigation(false)]
 [UIBreadcrumbs(false)]
