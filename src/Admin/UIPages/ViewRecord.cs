@@ -15,11 +15,10 @@ namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
 [UIPageLocation(PageLocationEnum.Dialog)]
 [UINavigation(false)]
 [UIBreadcrumbs(false)]
-public class ViewRecord : EditPageBase
+public class ViewRecord(IFormDataBinder formDataBinder, ISqlBrowserResultProvider sqlBrowserResultProvider) : EditPageBase(formDataBinder)
 {
     private const string EOL_REPLACEMENT = "#EOL#";
     private readonly Regex newLineRegex = RegexHelper.GetRegex(@"(<br[ ]?/>)|([\r]?\n)");
-    private readonly ISqlBrowserResultProvider sqlBrowserResultProvider;
 
 
     /// <summary>
@@ -27,11 +26,6 @@ public class ViewRecord : EditPageBase
     /// </summary>
     [PageParameter(typeof(IntPageModelBinder))]
     public int RecordId { get; set; }
-
-
-    public ViewRecord(IFormDataBinder formDataBinder, ISqlBrowserResultProvider sqlBrowserResultProvider) : base(formDataBinder) =>
-        this.sqlBrowserResultProvider = sqlBrowserResultProvider;
-
 
     public override async Task ConfigurePage()
     {

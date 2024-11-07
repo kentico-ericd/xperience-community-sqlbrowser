@@ -6,25 +6,16 @@ using CMS.Base;
 using CMS.Core;
 using CMS.DataEngine;
 
-using XperienceCommunity.SqlBrowser.Admin.UIPages;
-
 namespace XperienceCommunity.SqlBrowser.Services;
 
 /// <summary>
 /// Default implementation of <see cref="ISqlBrowserResultProvider"/>.
 /// </summary>
-public class SqlBrowserResultProvider : ISqlBrowserResultProvider
+public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBrowserResultProvider
 {
     private string? query;
     private DataSet? result;
-    private readonly IEventLogService eventLogService;
-
-
-    public const string ROW_IDENTIFIER_COLUMN = $"{nameof(ResultListing)}_result_identifier";
-
-
-    public SqlBrowserResultProvider(IEventLogService eventLogService) => this.eventLogService = eventLogService;
-
+    public const string ROW_IDENTIFIER_COLUMN = $"{nameof(SqlBrowserResultProvider)}_result_identifier";
 
     public IEnumerable<string> GetColumnNames()
     {
@@ -35,7 +26,7 @@ public class SqlBrowserResultProvider : ISqlBrowserResultProvider
             return [];
         }
 
-        return result?.Tables[0].Columns.OfType<DataColumn>().Select(c => c.ColumnName) ?? [];
+        return result!.Tables[0].Columns.OfType<DataColumn>().Select(c => c.ColumnName);
     }
 
 
@@ -67,20 +58,20 @@ public class SqlBrowserResultProvider : ISqlBrowserResultProvider
             return 0;
         }
 
-        return result?.Tables[0].Rows.Count ?? 0;
+        return result!.Tables[0].Rows.Count;
     }
 
 
-    public IEnumerable<IDataContainer>? GetRowsAsDataContainer()
+    public IEnumerable<IDataContainer> GetRowsAsDataContainer()
     {
         EnsureResult();
 
         if (ResultsAreEmpty())
         {
-            return null;
+            return [];
         }
 
-        return result?.Tables[0].Rows.OfType<DataRow>().Select((row, i) =>
+        return result!.Tables[0].Rows.OfType<DataRow>().Select((row, i) =>
         {
             var data = new DataContainer
             {
@@ -96,17 +87,17 @@ public class SqlBrowserResultProvider : ISqlBrowserResultProvider
     }
 
 
-    public IEnumerable<dynamic>? GetRowsAsDynamic()
+    public IEnumerable<dynamic> GetRowsAsDynamic()
     {
         EnsureResult();
 
         if (ResultsAreEmpty())
         {
-            return null;
+            return [];
         }
 
         var columnNames = GetColumnNames();
-        return result?.Tables[0].Rows.OfType<DataRow>().Select((row, i) =>
+        return result!.Tables[0].Rows.OfType<DataRow>().Select((row, i) =>
         {
             var obj = new ExpandoObject();
             foreach (string col in columnNames)
@@ -141,7 +132,8 @@ public class SqlBrowserResultProvider : ISqlBrowserResultProvider
         try
         {
             result = ConnectionHelper.ExecuteQuery(query, null, QueryTypeEnum.SQLQuery);
-            eventLogService.LogInformation(nameof(SqlBrowserResultProvider), nameof(EnsureResult), $"User executed query:{Environment.NewLine}{query}");
+            eventLogService.LogInformation(nameof(SqlBrowserResultProvider), nameof(EnsureResult),
+                $"User executed query:{Environment.NewLine}{query}");
         }
         catch (Exception ex)
         {

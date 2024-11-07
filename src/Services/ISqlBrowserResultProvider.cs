@@ -27,13 +27,13 @@ public interface ISqlBrowserResultProvider
     /// Gets the current result set converted to <see cref="IDataContainer"/>s, or <c>null</c> if conversion fails. Automatically sets the
     /// identifier for each container to be retrieved later by <see cref="GetRowAsText"/>.
     /// </summary>
-    public IEnumerable<IDataContainer>? GetRowsAsDataContainer();
+    public IEnumerable<IDataContainer> GetRowsAsDataContainer();
 
 
     /// <summary>
     /// Gets the current result set converted to dynamic objects, or <c>null</c> if conversion fails. 
     /// </summary>
-    public IEnumerable<dynamic>? GetRowsAsDynamic();
+    public IEnumerable<dynamic> GetRowsAsDynamic();
 
 
     /// <summary>

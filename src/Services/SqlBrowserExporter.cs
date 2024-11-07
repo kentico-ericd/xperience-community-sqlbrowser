@@ -12,15 +12,8 @@ namespace XperienceCommunity.SqlBrowser.Services;
 /// <summary>
 /// Default implementation of <see cref="ISqlBrowserExporter"/>.
 /// </summary>
-public class SqlBrowserExporter : ISqlBrowserExporter
+public class SqlBrowserExporter(ISqlBrowserResultProvider sqlBrowserResultProvider) : ISqlBrowserExporter
 {
-    private readonly ISqlBrowserResultProvider sqlBrowserResultProvider;
-
-
-    public SqlBrowserExporter(ISqlBrowserResultProvider sqlBrowserResultProvider) =>
-        this.sqlBrowserResultProvider = sqlBrowserResultProvider;
-
-
     public string ExportToCsv()
     {
         string path = GetExportPath(".csv");

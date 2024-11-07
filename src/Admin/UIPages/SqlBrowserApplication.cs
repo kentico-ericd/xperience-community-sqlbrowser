@@ -1,6 +1,4 @@
-﻿using CMS.Membership;
-
-using Kentico.Xperience.Admin.Base;
+﻿using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.Admin.Base.UIPages;
 
 using XperienceCommunity.SqlBrowser.Admin.UIPages;
@@ -48,10 +46,6 @@ namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
 /// <summary>
 /// The root application page for the SQL browser.
 /// </summary>
-[UIPermission(SystemPermissions.VIEW)]
-[UIPermission(SystemPermissions.CREATE)]
-[UIPermission(SystemPermissions.UPDATE)]
-[UIPermission(SystemPermissions.DELETE)]
 public class SqlBrowserApplicationPage : ApplicationPage
 {
     public const string IDENTIFIER = "XperienceCommunity.SqlBrowser";

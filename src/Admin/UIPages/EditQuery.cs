@@ -12,21 +12,13 @@ namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
 /// Edit UI page for submitting query text to <see cref="ISqlBrowserResultProvider"/>. 
 /// </summary>
 [UINavigation(false)]
-public class EditQuery : EditPageBase
+public class EditQuery(
+    IFormDataBinder binder,
+    IFormComponentMapper formComponentMapper,
+    IPageUrlGenerator pageUrlGenerator,
+    ISqlBrowserResultProvider sqlBrowserResultProvider) : EditPageBase(binder)
 {
     private const string QUERY_FIELDNAME = "QueryText";
-    private readonly IPageUrlGenerator pageUrlGenerator;
-    private readonly IFormComponentMapper formComponentMapper;
-    private readonly ISqlBrowserResultProvider sqlBrowserResultProvider;
-
-
-    public EditQuery(IFormDataBinder binder, IFormComponentMapper formComponentMapper, IPageUrlGenerator pageUrlGenerator, ISqlBrowserResultProvider sqlBrowserResultProvider)
-        : base(binder)
-    {
-        this.pageUrlGenerator = pageUrlGenerator;
-        this.formComponentMapper = formComponentMapper;
-        this.sqlBrowserResultProvider = sqlBrowserResultProvider;
-    }
 
 
     public override async Task<EditTemplateClientProperties> ConfigureTemplateProperties(EditTemplateClientProperties properties)

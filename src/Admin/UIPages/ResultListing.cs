@@ -13,34 +13,21 @@ namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
 /// Listing UI page which displays the results of a SQL query.
 /// </summary>
 [UINavigation(false)]
-public class ResultListing : DataContainerListingPage
+public class ResultListing(
+    ISqlBrowserResultProvider sqlBrowserQueryProvider,
+    ISqlBrowserExporter sqlBrowserExporter,
+    IEventLogService eventLogService) : DataContainerListingPage
 {
-    private readonly IEventLogService eventLogService;
-    private readonly ISqlBrowserResultProvider sqlBrowserQueryProvider;
-    private readonly ISqlBrowserExporter sqlBrowserExporter;
-
-
-    public ResultListing(
-        ISqlBrowserResultProvider sqlBrowserQueryProvider,
-        ISqlBrowserExporter sqlBrowserExporter,
-        IEventLogService eventLogService)
-    {
-        this.eventLogService = eventLogService;
-        this.sqlBrowserExporter = sqlBrowserExporter;
-        this.sqlBrowserQueryProvider = sqlBrowserQueryProvider;
-    }
-
-
     public override Task ConfigurePage()
     {
         int recordCount = sqlBrowserQueryProvider.GetTotalRecordCount();
-        if (recordCount <= 0)
+        if (recordCount == 0)
         {
             PageConfiguration.Callouts = [
                 new CalloutConfiguration
                 {
-                    Headline = "Error loading data",
-                    Content = "Query result has no data, please check the Event log for errors",
+                    Headline = "No results",
+                    Content = "Query result has no data, please check the Event log for errors or modify your query",
                     Placement = CalloutPlacement.OnPaper,
                     Type = CalloutType.FriendlyWarning
                 }];
@@ -67,28 +54,16 @@ public class ResultListing : DataContainerListingPage
 
 
     [PageCommand]
-    public Task<ICommandResponse<RowActionResult>> ViewRecord(int id)
-    {
-        string recordText = sqlBrowserQueryProvider.GetRowAsText(id);
-
-        return Task.FromResult(ResponseFrom(new RowActionResult(false)).AddSuccessMessage(recordText));
-    }
+    public Task<ICommandResponse<RowActionResult>> ViewRecord(int id) =>
+        Task.FromResult(ResponseFrom(new RowActionResult(false)).AddSuccessMessage(sqlBrowserQueryProvider.GetRowAsText(id)));
 
 
     protected override object GetIdentifier(IDataContainer dataContainer) =>
         ValidationHelper.GetInteger(dataContainer[SqlBrowserResultProvider.ROW_IDENTIFIER_COLUMN], -1);
 
 
-    protected override Task<IEnumerable<IDataContainer>> LoadDataContainers(CancellationToken cancellationToken)
-    {
-        var containers = sqlBrowserQueryProvider.GetRowsAsDataContainer();
-        if (containers is null)
-        {
-            return Task.FromResult<IEnumerable<IDataContainer>>([]);
-        }
-
-        return Task.FromResult(containers);
-    }
+    protected override Task<IEnumerable<IDataContainer>> LoadDataContainers(CancellationToken cancellationToken) =>
+        Task.FromResult(sqlBrowserQueryProvider.GetRowsAsDataContainer());
 
 
     private void ConfigureColumns()
