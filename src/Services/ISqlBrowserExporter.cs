@@ -9,12 +9,12 @@ public interface ISqlBrowserExporter
     /// Exports the current SQL query results as a .csv file.
     /// </summary>
     /// <returns>The path of the resulting file.</returns>
-    public Task<string> ExportToCsv();
+    public string ExportToCsv();
 
 
     /// <summary>
     /// Exports the current SQL query results as a .xlsx file.
     /// </summary>
     /// <returns>The path of the resulting file.</returns>
-    public Task<string> ExportToXls();
+    public string ExportToXls();
 }

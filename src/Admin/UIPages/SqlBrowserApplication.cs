@@ -15,11 +15,11 @@ using XperienceCommunity.SqlBrowser.Admin.UIPages;
     icon: Icons.Database,
     templateName: TemplateNames.SECTION_LAYOUT)]
 
-// Create page
+// Edit page
 [assembly: UIPage(
     parentType: typeof(SqlBrowserApplicationPage),
-    slug: "create",
-    uiPageType: typeof(SqlBrowserQueryInfoCreate),
+    slug: "new",
+    uiPageType: typeof(EditQuery),
     name: "New query",
     templateName: TemplateNames.EDIT,
     order: UIPageOrder.First)]

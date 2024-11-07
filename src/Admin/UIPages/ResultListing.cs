@@ -33,7 +33,8 @@ public class ResultListing : DataContainerListingPage
 
     public override Task ConfigurePage()
     {
-        if (!sqlBrowserQueryProvider.GetColumnNames().Any())
+        int recordCount = sqlBrowserQueryProvider.GetTotalRecordCount();
+        if (recordCount <= 0)
         {
             PageConfiguration.Callouts = [
                 new CalloutConfiguration
@@ -47,7 +48,7 @@ public class ResultListing : DataContainerListingPage
         else
         {
             ConfigureColumns();
-            PageConfiguration.Caption = "Results";
+            PageConfiguration.Caption = $"Results ({recordCount})";
             PageConfiguration.HeaderActions.AddCommand("Export to CSV", nameof(ExportToCsv));
             PageConfiguration.HeaderActions.AddCommand("Export to Excel", nameof(ExportToXls));
             PageConfiguration.AddEditRowAction<ViewRecord>();
@@ -83,7 +84,7 @@ public class ResultListing : DataContainerListingPage
         var containers = sqlBrowserQueryProvider.GetRowsAsDataContainer();
         if (containers is null)
         {
-            return Task.FromResult(Enumerable.Empty<IDataContainer>());
+            return Task.FromResult<IEnumerable<IDataContainer>>([]);
         }
 
         return Task.FromResult(containers);
@@ -102,7 +103,7 @@ public class ResultListing : DataContainerListingPage
     }
 
 
-    private async Task<ICommandResponse> Export(SqlBrowserExportType exportType)
+    private Task<ICommandResponse> Export(SqlBrowserExportType exportType)
     {
         string? exportedPath = null;
         try
@@ -110,10 +111,10 @@ public class ResultListing : DataContainerListingPage
             switch (exportType)
             {
                 case SqlBrowserExportType.Csv:
-                    exportedPath = await sqlBrowserExporter.ExportToCsv();
+                    exportedPath = sqlBrowserExporter.ExportToCsv();
                     break;
                 case SqlBrowserExportType.Excel:
-                    exportedPath = await sqlBrowserExporter.ExportToXls();
+                    exportedPath = sqlBrowserExporter.ExportToXls();
                     break;
                 default:
                     break;
@@ -126,11 +127,11 @@ public class ResultListing : DataContainerListingPage
 
         if (!string.IsNullOrEmpty(exportedPath))
         {
-            return Response().AddSuccessMessage($"Exported results to {exportedPath}");
+            return Task.FromResult(Response().AddSuccessMessage($"Exported results to {exportedPath}"));
         }
         else
         {
-            return Response().AddErrorMessage("Export failed, please check the Event log for errors");
+            return Task.FromResult(Response().AddErrorMessage("Export failed, please check the Event log for errors"));
         }
     }
 }

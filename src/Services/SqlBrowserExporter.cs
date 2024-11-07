@@ -21,23 +21,24 @@ public class SqlBrowserExporter : ISqlBrowserExporter
         this.sqlBrowserResultProvider = sqlBrowserResultProvider;
 
 
-    public async Task<string> ExportToCsv()
+    public string ExportToCsv()
     {
         string path = GetExportPath(".csv");
         var dynamics = sqlBrowserResultProvider.GetRowsAsDynamic() ?? throw new InvalidOperationException("Failed to convert rows to dynamic objects");
         using (var writer = new StreamWriter(path))
         using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
         {
-            await csv.WriteRecordsAsync(dynamics);
+            csv.WriteRecords(dynamics);
         }
 
         return path;
     }
 
 
-    public Task<string> ExportToXls()
+    public string ExportToXls()
     {
         string path = GetExportPath(".xlsx");
+        var columnNames = sqlBrowserResultProvider.GetColumnNames();
         var dynamics = sqlBrowserResultProvider.GetRowsAsDynamic() ?? throw new InvalidOperationException("Failed to convert rows to dynamic objects");
         using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write))
         {
@@ -47,7 +48,7 @@ public class SqlBrowserExporter : ISqlBrowserExporter
             var row = excelSheet.CreateRow(0);
             int columnIndex = 0;
 
-            foreach (string col in sqlBrowserResultProvider.GetColumnNames())
+            foreach (string col in columnNames)
             {
                 row.CreateCell(columnIndex).SetCellValue(col);
                 columnIndex++;
@@ -58,7 +59,7 @@ public class SqlBrowserExporter : ISqlBrowserExporter
             {
                 row = excelSheet.CreateRow(rowIndex);
                 int cellIndex = 0;
-                foreach (string col in sqlBrowserResultProvider.GetColumnNames())
+                foreach (string col in columnNames)
                 {
                     var cell = row.CreateCell(cellIndex);
                     object? value = (dyn as IDictionary<string, object>)?[col];
@@ -75,7 +76,7 @@ public class SqlBrowserExporter : ISqlBrowserExporter
             workbook.Write(fs);
         }
 
-        return Task.FromResult(path);
+        return path;
     }
 
 

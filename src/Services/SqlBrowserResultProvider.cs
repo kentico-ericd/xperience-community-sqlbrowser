@@ -7,7 +7,6 @@ using CMS.Core;
 using CMS.DataEngine;
 
 using XperienceCommunity.SqlBrowser.Admin.UIPages;
-using XperienceCommunity.SqlBrowser.Infos;
 
 namespace XperienceCommunity.SqlBrowser.Services;
 
@@ -16,8 +15,8 @@ namespace XperienceCommunity.SqlBrowser.Services;
 /// </summary>
 public class SqlBrowserResultProvider : ISqlBrowserResultProvider
 {
+    private string? query;
     private DataSet? result;
-    private SqlBrowserQueryInfo? query;
     private readonly IEventLogService eventLogService;
 
 
@@ -31,8 +30,12 @@ public class SqlBrowserResultProvider : ISqlBrowserResultProvider
     {
         EnsureResult();
 
-        return result?.Tables.Count > 0 ?
-            result.Tables[0].Columns.OfType<DataColumn>().Select(c => c.ColumnName) : [];
+        if (ResultsAreEmpty())
+        {
+            return [];
+        }
+
+        return result?.Tables[0].Columns.OfType<DataColumn>().Select(c => c.ColumnName) ?? [];
     }
 
 
@@ -55,11 +58,24 @@ public class SqlBrowserResultProvider : ISqlBrowserResultProvider
     }
 
 
+    public int GetTotalRecordCount()
+    {
+        EnsureResult();
+
+        if (ResultsAreEmpty())
+        {
+            return 0;
+        }
+
+        return result?.Tables[0].Rows.Count ?? 0;
+    }
+
+
     public IEnumerable<IDataContainer>? GetRowsAsDataContainer()
     {
         EnsureResult();
 
-        if (result?.Tables.Count == 0)
+        if (ResultsAreEmpty())
         {
             return null;
         }
@@ -84,15 +100,16 @@ public class SqlBrowserResultProvider : ISqlBrowserResultProvider
     {
         EnsureResult();
 
-        if (result?.Tables.Count == 0)
+        if (ResultsAreEmpty())
         {
             return null;
         }
 
+        var columnNames = GetColumnNames();
         return result?.Tables[0].Rows.OfType<DataRow>().Select((row, i) =>
         {
             var obj = new ExpandoObject();
-            foreach (string col in GetColumnNames())
+            foreach (string col in columnNames)
             {
                 (obj as IDictionary<string, object>).Add(col, row[col]);
             }
@@ -102,10 +119,10 @@ public class SqlBrowserResultProvider : ISqlBrowserResultProvider
     }
 
 
-    public void SetQuery(SqlBrowserQueryInfo queryInfo)
+    public void SetQuery(string queryText)
     {
         result = null;
-        query = queryInfo;
+        query = queryText;
     }
 
 
@@ -116,14 +133,15 @@ public class SqlBrowserResultProvider : ISqlBrowserResultProvider
             return;
         }
 
-        if (query is null || string.IsNullOrEmpty(query.SqlBrowserQueryText))
+        if (string.IsNullOrEmpty(query))
         {
             throw new InvalidOperationException($"No query present in {nameof(SqlBrowserResultProvider)}");
         }
 
         try
         {
-            result = ConnectionHelper.ExecuteQuery(query.SqlBrowserQueryText, null, QueryTypeEnum.SQLQuery);
+            result = ConnectionHelper.ExecuteQuery(query, null, QueryTypeEnum.SQLQuery);
+            eventLogService.LogInformation(nameof(SqlBrowserResultProvider), nameof(EnsureResult), $"User executed query:{Environment.NewLine}{query}");
         }
         catch (Exception ex)
         {
@@ -131,4 +149,7 @@ public class SqlBrowserResultProvider : ISqlBrowserResultProvider
             eventLogService.LogException(nameof(SqlBrowserResultProvider), nameof(EnsureResult), ex);
         }
     }
+
+
+    private bool ResultsAreEmpty() => result is null || (result?.Tables.Count ?? 0) == 0;
 }

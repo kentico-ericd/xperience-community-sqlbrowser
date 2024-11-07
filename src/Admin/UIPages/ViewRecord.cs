@@ -1,4 +1,5 @@
 ﻿using CMS.Helpers;
+
 using System.Text.RegularExpressions;
 
 using Kentico.Xperience.Admin.Base;
@@ -16,9 +17,9 @@ namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
 [UIBreadcrumbs(false)]
 public class ViewRecord : EditPageBase
 {
-    private readonly string recordText;
     private const string EOL_REPLACEMENT = "#EOL#";
     private readonly Regex newLineRegex = RegexHelper.GetRegex(@"(<br[ ]?/>)|([\r]?\n)");
+    private readonly ISqlBrowserResultProvider sqlBrowserResultProvider;
 
 
     /// <summary>
@@ -28,8 +29,8 @@ public class ViewRecord : EditPageBase
     public int RecordId { get; set; }
 
 
-    public ViewRecord(IFormDataBinder formDataBinder, ISqlBrowserResultProvider sqlBrowserQueryProvider) : base(formDataBinder) =>
-        recordText = sqlBrowserQueryProvider.GetRowAsText(RecordId);
+    public ViewRecord(IFormDataBinder formDataBinder, ISqlBrowserResultProvider sqlBrowserResultProvider) : base(formDataBinder) =>
+        this.sqlBrowserResultProvider = sqlBrowserResultProvider;
 
 
     public override async Task ConfigurePage()
@@ -40,10 +41,10 @@ public class ViewRecord : EditPageBase
         await base.ConfigurePage();
     }
 
-
     public override Task<EditTemplateClientProperties> ConfigureTemplateProperties(EditTemplateClientProperties properties)
     {
-        string text = newLineRegex.Replace(recordText, EOL_REPLACEMENT);
+        string text = sqlBrowserResultProvider.GetRowAsText(RecordId);
+        text = newLineRegex.Replace(text, EOL_REPLACEMENT);
         properties.Items = [
             new TextWithLabelClientProperties()
             {

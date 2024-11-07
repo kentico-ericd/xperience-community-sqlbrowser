@@ -1,7 +1,5 @@
 ﻿using CMS.Base;
 
-using XperienceCommunity.SqlBrowser.Infos;
-
 namespace XperienceCommunity.SqlBrowser.Services;
 
 /// <summary>
@@ -22,6 +20,9 @@ public interface ISqlBrowserResultProvider
     public string GetRowAsText(int rowIdentifier);
 
 
+    public int GetTotalRecordCount();
+
+
     /// <summary>
     /// Gets the current result set converted to <see cref="IDataContainer"/>s, or <c>null</c> if conversion fails. Automatically sets the
     /// identifier for each container to be retrieved later by <see cref="GetRowAsText"/>.
@@ -38,5 +39,5 @@ public interface ISqlBrowserResultProvider
     /// <summary>
     /// Sets the query to retrieve results from, and clears the current result set.
     /// </summary>
-    public void SetQuery(SqlBrowserQueryInfo queryInfo);
+    public void SetQuery(string queryText);
 }
