@@ -33,7 +33,7 @@ public class EditQuery(
     protected override Task<ICollection<IFormItem>> GetFormItems()
     {
         var formInfo = GetFormInfo();
-        var elements = formInfo?.GetFormElements(true, false) ?? new List<IDataDefinitionItem>();
+        var elements = formInfo.GetFormElements(true, false);
         var formItems = GetFormComponents(elements.OfType<FormFieldInfo>()).ToList<IFormItem>();
 
         return Task.FromResult(formItems as ICollection<IFormItem>);
