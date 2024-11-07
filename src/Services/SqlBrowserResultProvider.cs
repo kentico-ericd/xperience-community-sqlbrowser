@@ -111,6 +111,9 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
     }
 
 
+    public string? GetQuery() => query;
+
+
     public void SetQuery(string queryText)
     {
         result = null;

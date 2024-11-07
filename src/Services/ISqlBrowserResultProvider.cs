@@ -27,6 +27,12 @@ public interface ISqlBrowserResultProvider
 
 
     /// <summary>
+    /// Gets the SQL query, or <c>null</c> if not set.
+    /// </summary>
+    public string? GetQuery();
+
+
+    /// <summary>
     /// Gets the current result set converted to <see cref="IDataContainer"/>s. Automatically sets the identifier for each container to
     /// be retrieved later by <see cref="GetRowAsText"/>.
     /// </summary>

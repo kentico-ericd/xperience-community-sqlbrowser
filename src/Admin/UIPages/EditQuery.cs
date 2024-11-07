@@ -70,7 +70,7 @@ public class EditQuery(
     protected ICollection<IFormComponent> GetFormComponents(IEnumerable<FormFieldInfo> formFields) => formComponentMapper.Map(formFields).ToList();
 
 
-    private static FormInfo GetFormInfo()
+    private FormInfo GetFormInfo()
     {
         var formInfo = new FormInfo();
         formInfo.AddFormItem(new FormFieldInfo
@@ -86,7 +86,8 @@ public class EditQuery(
                 {"CopyButtonVisible", false},
                 {"MaxRowsNumber", 40},
                 {"MinRowsNumber", 10}
-            }
+            },
+            DefaultValue = sqlBrowserResultProvider.GetQuery() ?? string.Empty
         });
 
         return formInfo;
