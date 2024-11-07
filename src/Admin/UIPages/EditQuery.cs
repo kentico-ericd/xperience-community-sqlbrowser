@@ -67,6 +67,9 @@ public class EditQuery(
     }
 
 
+    protected ICollection<IFormComponent> GetFormComponents(IEnumerable<FormFieldInfo> formFields) => formComponentMapper.Map(formFields).ToList();
+
+
     private static FormInfo GetFormInfo()
     {
         var formInfo = new FormInfo();
@@ -88,7 +91,4 @@ public class EditQuery(
 
         return formInfo;
     }
-
-
-    protected ICollection<IFormComponent> GetFormComponents(IEnumerable<FormFieldInfo> formFields) => formComponentMapper.Map(formFields).ToList();
 }

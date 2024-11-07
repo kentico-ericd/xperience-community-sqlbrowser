@@ -1,6 +1,7 @@
 ﻿using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.Admin.Base.UIPages;
 
+using XperienceCommunity.SqlBrowser.Admin;
 using XperienceCommunity.SqlBrowser.Admin.UIPages;
 
 // Main application
@@ -33,15 +34,15 @@ using XperienceCommunity.SqlBrowser.Admin.UIPages;
 
 // View record
 [assembly: UIPage(
-    typeof(ResultListing),
-    PageParameterConstants.PARAMETERIZED_SLUG,
-    typeof(ViewRecord),
-    "View record",
-    TemplateNames.EDIT,
-    UIPageOrder.NoOrder)]
+    parentType: typeof(ResultListing),
+    slug: PageParameterConstants.PARAMETERIZED_SLUG,
+    uiPageType: typeof(ViewRecord),
+    name: "View record",
+    templateName: TemplateNames.EDIT,
+    order: UIPageOrder.NoOrder)]
 
 
-namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
+namespace XperienceCommunity.SqlBrowser.Admin;
 
 /// <summary>
 /// The root application page for the SQL browser.

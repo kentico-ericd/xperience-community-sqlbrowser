@@ -38,6 +38,7 @@ public class ResultListing(
             PageConfiguration.Caption = $"Results ({recordCount})";
             PageConfiguration.HeaderActions.AddCommand("Export to CSV", nameof(ExportToCsv));
             PageConfiguration.HeaderActions.AddCommand("Export to Excel", nameof(ExportToXls));
+            PageConfiguration.HeaderActions.AddCommand("Export to JSON", nameof(ExportToJson));
             PageConfiguration.AddEditRowAction<ViewRecord>();
         }
 
@@ -51,6 +52,10 @@ public class ResultListing(
 
     [PageCommand]
     public Task<ICommandResponse> ExportToXls() => Export(SqlBrowserExportType.Excel);
+
+
+    [PageCommand]
+    public Task<ICommandResponse> ExportToJson() => Export(SqlBrowserExportType.Json);
 
 
     [PageCommand]
@@ -90,6 +95,9 @@ public class ResultListing(
                     break;
                 case SqlBrowserExportType.Excel:
                     exportedPath = sqlBrowserExporter.ExportToXls();
+                    break;
+                case SqlBrowserExportType.Json:
+                    exportedPath = sqlBrowserExporter.ExportToJson();
                     break;
                 default:
                     break;

@@ -17,6 +17,7 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
     private DataSet? result;
     public const string ROW_IDENTIFIER_COLUMN = $"{nameof(SqlBrowserResultProvider)}_result_identifier";
 
+
     public IEnumerable<string> GetColumnNames()
     {
         EnsureResult();
@@ -34,7 +35,7 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
     {
         EnsureResult();
 
-        var row = (result?.Tables[0].Rows[rowIdentifier]) ?? throw new InvalidOperationException($"Failed to load row {rowIdentifier}");
+        var row = (result!.Tables[0].Rows[rowIdentifier]) ?? throw new InvalidOperationException($"Failed to load row {rowIdentifier}");
         var textResult = new StringBuilder();
         foreach (string col in GetColumnNames())
         {
@@ -117,6 +118,9 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
     }
 
 
+    /// <summary>
+    /// Ensures <see cref="result"/> is not null and if so, sets it by executing the underlying query.
+    /// </summary>
     private void EnsureResult()
     {
         if (result is not null)
@@ -143,5 +147,8 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
     }
 
 
+    /// <summary>
+    /// Returns true if <see cref="result"/> is not null and contains at least one table.
+    /// </summary>
     private bool ResultsAreEmpty() => result is null || (result?.Tables.Count ?? 0) == 0;
 }

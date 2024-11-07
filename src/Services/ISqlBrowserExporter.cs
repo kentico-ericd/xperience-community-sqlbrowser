@@ -17,4 +17,11 @@ public interface ISqlBrowserExporter
     /// </summary>
     /// <returns>The path of the resulting file.</returns>
     public string ExportToXls();
+
+
+    /// <summary>
+    /// Exports the current SQL query results as a .json file.
+    /// </summary>
+    /// <returns>The path of the resulting file.</returns>
+    public string ExportToJson();
 }

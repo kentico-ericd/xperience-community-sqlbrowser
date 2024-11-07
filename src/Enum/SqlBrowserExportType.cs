@@ -6,5 +6,6 @@
 public enum SqlBrowserExportType
 {
     Csv,
-    Excel
+    Excel,
+    Json
 }

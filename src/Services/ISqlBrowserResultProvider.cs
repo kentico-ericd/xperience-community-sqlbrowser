@@ -20,18 +20,21 @@ public interface ISqlBrowserResultProvider
     public string GetRowAsText(int rowIdentifier);
 
 
+    /// <summary>
+    /// Gets the number of records in the result set.
+    /// </summary>
     public int GetTotalRecordCount();
 
 
     /// <summary>
-    /// Gets the current result set converted to <see cref="IDataContainer"/>s, or <c>null</c> if conversion fails. Automatically sets the
-    /// identifier for each container to be retrieved later by <see cref="GetRowAsText"/>.
+    /// Gets the current result set converted to <see cref="IDataContainer"/>s. Automatically sets the identifier for each container to
+    /// be retrieved later by <see cref="GetRowAsText"/>.
     /// </summary>
     public IEnumerable<IDataContainer> GetRowsAsDataContainer();
 
 
     /// <summary>
-    /// Gets the current result set converted to dynamic objects, or <c>null</c> if conversion fails. 
+    /// Gets the current result set converted to dynamic objects. 
     /// </summary>
     public IEnumerable<dynamic> GetRowsAsDynamic();
 
