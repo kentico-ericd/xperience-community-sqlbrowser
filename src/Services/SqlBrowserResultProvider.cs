@@ -98,7 +98,7 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
         }
 
         var columnNames = GetColumnNames();
-        return result!.Tables[0].Rows.OfType<DataRow>().Select((row, i) =>
+        return result!.Tables[0].Rows.OfType<DataRow>().Select(row =>
         {
             var obj = new ExpandoObject();
             foreach (string col in columnNames)
@@ -151,7 +151,7 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
 
 
     /// <summary>
-    /// Returns true if <see cref="result"/> is not null and contains at least one table.
+    /// Returns true if <see cref="result"/> is null or contains no tables.
     /// </summary>
     private bool ResultsAreEmpty() => result is null || (result?.Tables.Count ?? 0) == 0;
 }

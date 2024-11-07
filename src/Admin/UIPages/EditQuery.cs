@@ -83,9 +83,9 @@ public class EditQuery(
             Enabled = true,
             Settings = new() {
                 {"controlname", TextAreaComponent.IDENTIFIER},
-                {"CopyButtonVisible", false},
-                {"MaxRowsNumber", 40},
-                {"MinRowsNumber", 10}
+                {nameof(TextAreaClientProperties.CopyButtonVisible), false},
+                {nameof(TextAreaClientProperties.MaxRowsNumber), 40},
+                {nameof(TextAreaClientProperties.MinRowsNumber), 10}
             },
             DefaultValue = sqlBrowserResultProvider.GetQuery() ?? string.Empty
         });
