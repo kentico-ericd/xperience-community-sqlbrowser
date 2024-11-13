@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 
+using CMS.Core;
 using CMS.DataEngine;
 using CMS.FormEngine;
 using CMS.Helpers;
@@ -21,7 +22,9 @@ public class EditQuery(
     IFormDataBinder binder,
     IFormComponentMapper formComponentMapper,
     IPageUrlGenerator pageUrlGenerator,
-    ISqlBrowserResultProvider sqlBrowserResultProvider) : EditPageBase(binder)
+    ISqlBrowserResultProvider sqlBrowserResultProvider,
+    IProgressiveCache progressiveCache,
+    IEventLogService eventLogService) : EditPageBase(binder)
 {
     private const string QUERY_FIELDNAME = "QueryText";
     private const string TABLES_FIELDNAME = "DatabaseTables";
@@ -50,6 +53,11 @@ public class EditQuery(
         var formInfo = GetFormInfo();
         var elements = formInfo.GetFormElements(true, false);
         var formItems = GetFormComponents(elements.OfType<FormFieldInfo>()).ToList<IFormItem>();
+
+        // Remove validation rules from tables component
+        var tableComponent = formItems.OfType<TextWithLabelComponent>().FirstOrDefault(prop =>
+            prop.Name.Equals(TABLES_FIELDNAME, StringComparison.OrdinalIgnoreCase));
+        tableComponent?.ValidationRules.Clear();
 
         return Task.FromResult(formItems as ICollection<IFormItem>);
     }
@@ -141,6 +149,39 @@ public class EditQuery(
 
     private string GetTables()
     {
+        var groupedRows = progressiveCache.Load(LoadTables, new CacheSettings(10, $"{nameof(EditQuery)}|{nameof(GetTables)}"));
+        var builder = new StringBuilder()
+            .Append("<h2>Available tables</h2>")
+            .Append(Environment.NewLine);
+        if (!groupedRows.Any())
+        {
+            return builder.Append("Failed to load database tables, please check the Event log").ToString();
+        }
+
+        foreach (var group in groupedRows)
+        {
+            var columnNames = group.Select(row => row["column"]);
+            builder
+                .Append("<u>")
+                .Append(group.Key)
+                .Append("</u>")
+                .Append(Environment.NewLine)
+                .Append(string.Join(", ", columnNames))
+                .Append(Environment.NewLine)
+                .Append(Environment.NewLine);
+        }
+
+        string resultText = newLineRegex.Replace(builder.ToString(), EOL_REPLACEMENT);
+
+        return resultText.Replace(EOL_REPLACEMENT, "<br />");
+    }
+
+
+    /// <summary>
+    /// Gets all database columns grouped by their table.
+    /// </summary>
+    private IEnumerable<IGrouping<object, DataRow>> LoadTables(CacheSettings cs)
+    {
         try
         {
             string query = @"SELECT
@@ -148,39 +189,24 @@ public class EditQuery(
                          C.name AS 'column'
                 FROM     sys.objects AS T
                          JOIN sys.columns AS C ON T.object_id = C.object_id
-                         JOIN sys.types AS P ON C.system_type_id = P.system_type_id
                 WHERE    T.type = 'U'
                 ORDER BY T.name ASC";
             var result = ConnectionHelper.ExecuteQuery(query, null, QueryTypeEnum.SQLQuery);
             if (result.Tables.Count == 0)
             {
-                return string.Empty;
+                cs.Cached = false;
+
+                return [];
             }
 
-            var groupedRows = result.Tables[0].Rows.OfType<DataRow>().GroupBy(r => r["table"]);
-            var builder = new StringBuilder()
-                .Append("<h2>Available tables</h2>")
-                .Append(Environment.NewLine);
-            foreach (var group in groupedRows)
-            {
-                var columnNames = group.Select(row => row["column"]);
-                builder
-                    .Append("<u>")
-                    .Append(group.Key)
-                    .Append("</u>")
-                    .Append(Environment.NewLine)
-                    .Append(string.Join(", ", columnNames))
-                    .Append(Environment.NewLine)
-                    .Append(Environment.NewLine);
-            }
-
-            string resultText = newLineRegex.Replace(builder.ToString(), EOL_REPLACEMENT);
-
-            return resultText.Replace(EOL_REPLACEMENT, "<br />");
+            return result.Tables[0].Rows.OfType<DataRow>().GroupBy(r => r["table"]);
         }
-        catch
+        catch (Exception ex)
         {
-            return string.Empty;
+            cs.Cached = false;
+            eventLogService.LogException(nameof(EditQuery), nameof(LoadTables), ex);
+
+            return [];
         }
     }
 }
