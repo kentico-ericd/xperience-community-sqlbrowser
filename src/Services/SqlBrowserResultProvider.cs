@@ -31,11 +31,11 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
     }
 
 
-    public string GetRowAsText(int rowIdentifier)
+    public Task<string> GetRowAsText(int rowIdentifier)
     {
         EnsureResult();
 
-        var row = (result!.Tables[0].Rows[rowIdentifier]) ?? throw new InvalidOperationException($"Failed to load row {rowIdentifier}");
+        var row = result!.Tables[0].Rows[rowIdentifier] ?? throw new InvalidOperationException($"Failed to load row {rowIdentifier}");
         var textResult = new StringBuilder();
         foreach (string col in GetColumnNames())
         {
@@ -46,7 +46,7 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
                 .Append(Environment.NewLine);
         }
 
-        return textResult.ToString();
+        return Task.FromResult(textResult.ToString());
     }
 
 
@@ -63,17 +63,17 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
     }
 
 
-    public IEnumerable<IDataContainer> GetRowsAsDataContainer()
+    public Task<IEnumerable<IDataContainer>> GetRowsAsDataContainer()
     {
         EnsureResult();
 
         if (ResultsAreEmpty())
         {
-            return [];
+            return Task.FromResult<IEnumerable<IDataContainer>>([]);
         }
 
         var columnNames = GetColumnNames();
-        return result!.Tables[0].Rows.OfType<DataRow>().Select((row, i) =>
+        var containers = result!.Tables[0].Rows.OfType<DataRow>().Select((row, i) =>
         {
             var data = new DataContainer
             {
@@ -86,20 +86,22 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
 
             return data;
         });
+
+        return Task.FromResult<IEnumerable<IDataContainer>>(containers);
     }
 
 
-    public IEnumerable<dynamic> GetRowsAsDynamic()
+    public Task<IEnumerable<dynamic>> GetRowsAsDynamic()
     {
         EnsureResult();
 
         if (ResultsAreEmpty())
         {
-            return [];
+            return Task.FromResult<IEnumerable<dynamic>>([]);
         }
 
         var columnNames = GetColumnNames();
-        return result!.Tables[0].Rows.OfType<DataRow>().Select(row =>
+        var dynamics = result!.Tables[0].Rows.OfType<DataRow>().Select(row =>
         {
             var obj = new ExpandoObject();
             foreach (string col in columnNames)
@@ -109,6 +111,8 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
 
             return obj;
         });
+
+        return Task.FromResult<IEnumerable<dynamic>>(dynamics);
     }
 
 
@@ -154,5 +158,5 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
     /// <summary>
     /// Returns true if <see cref="result"/> is null or contains no tables.
     /// </summary>
-    private bool ResultsAreEmpty() => result is null || (result?.Tables.Count ?? 0) == 0;
+    private bool ResultsAreEmpty() => result is null || result.Tables.Count == 0;
 }

@@ -16,35 +16,35 @@ namespace XperienceCommunity.SqlBrowser.Services;
 /// </summary>
 public class SqlBrowserExporter(ISqlBrowserResultProvider sqlBrowserResultProvider) : ISqlBrowserExporter
 {
-    public string ExportToCsv()
+    public async Task<string> ExportToCsv()
     {
         string path = GetExportPath(".csv");
-        var dynamics = sqlBrowserResultProvider.GetRowsAsDynamic();
+        var dynamics = await sqlBrowserResultProvider.GetRowsAsDynamic();
         using (var writer = new StreamWriter(path))
         using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
         {
-            csv.WriteRecords(dynamics);
+            await csv.WriteRecordsAsync(dynamics);
         }
 
         return path;
     }
 
 
-    public string ExportToJson()
+    public async Task<string> ExportToJson()
     {
         string path = GetExportPath(".json");
-        var dynamics = sqlBrowserResultProvider.GetRowsAsDynamic();
+        var dynamics = await sqlBrowserResultProvider.GetRowsAsDynamic();
         string jsonText = JsonConvert.SerializeObject(dynamics);
-        File.WriteAllText(path, jsonText);
+        await File.WriteAllTextAsync(path, jsonText);
 
         return path;
     }
 
 
-    public string ExportToXls()
+    public async Task<string> ExportToXls()
     {
         string path = GetExportPath(".xlsx");
-        var workbook = GetWorkbook();
+        var workbook = await GetWorkbook();
         using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write))
         {
             workbook.Write(fs);
@@ -67,10 +67,10 @@ public class SqlBrowserExporter(ISqlBrowserResultProvider sqlBrowserResultProvid
     }
 
 
-    private IWorkbook GetWorkbook()
+    private async Task<IWorkbook> GetWorkbook()
     {
         var columnNames = sqlBrowserResultProvider.GetColumnNames();
-        var dynamics = sqlBrowserResultProvider.GetRowsAsDynamic();
+        var dynamics = await sqlBrowserResultProvider.GetRowsAsDynamic();
 
         IWorkbook workbook = new XSSFWorkbook();
         var excelSheet = workbook.CreateSheet("Sheet1");

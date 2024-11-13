@@ -116,7 +116,7 @@ public class EditQuery(
             Enabled = true,
             Settings = new() {
                 {"controlname", TextAreaComponent.IDENTIFIER},
-                {nameof(TextAreaClientProperties.CopyButtonVisible), false},
+                {nameof(TextAreaClientProperties.CopyButtonVisible), true},
                 {nameof(TextAreaClientProperties.MaxRowsNumber), 40},
                 {nameof(TextAreaClientProperties.MinRowsNumber), 10}
             },

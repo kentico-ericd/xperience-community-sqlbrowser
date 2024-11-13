@@ -35,9 +35,9 @@ public class ViewRecord(IFormDataBinder formDataBinder, ISqlBrowserResultProvide
         await base.ConfigurePage();
     }
 
-    public override Task<EditTemplateClientProperties> ConfigureTemplateProperties(EditTemplateClientProperties properties)
+    public override async Task<EditTemplateClientProperties> ConfigureTemplateProperties(EditTemplateClientProperties properties)
     {
-        string text = sqlBrowserResultProvider.GetRowAsText(RecordId);
+        string text = await sqlBrowserResultProvider.GetRowAsText(RecordId);
         text = newLineRegex.Replace(text, EOL_REPLACEMENT);
         properties.Items = [
             new TextWithLabelClientProperties()
@@ -49,7 +49,7 @@ public class ViewRecord(IFormDataBinder formDataBinder, ISqlBrowserResultProvide
             }
         ];
 
-        return Task.FromResult(properties);
+        return properties;
     }
 
 
