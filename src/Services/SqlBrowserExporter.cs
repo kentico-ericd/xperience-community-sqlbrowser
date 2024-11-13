@@ -86,12 +86,13 @@ public class SqlBrowserExporter(ISqlBrowserResultProvider sqlBrowserResultProvid
         int rowIndex = 1;
         foreach (var dyn in dynamics)
         {
-            row = excelSheet.CreateRow(rowIndex);
             int cellIndex = 0;
+            row = excelSheet.CreateRow(rowIndex);
+            var valuesDictionary = dyn as IDictionary<string, object>;
             foreach (string col in columnNames)
             {
                 var cell = row.CreateCell(cellIndex);
-                object? value = (dyn as IDictionary<string, object>)?[col];
+                object? value = valuesDictionary?[col];
                 if (value is not null)
                 {
                     cell.SetCellValue(value.ToString());

@@ -72,13 +72,14 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
             return [];
         }
 
+        var columnNames = GetColumnNames();
         return result!.Tables[0].Rows.OfType<DataRow>().Select((row, i) =>
         {
             var data = new DataContainer
             {
                 [ROW_IDENTIFIER_COLUMN] = i,
             };
-            foreach (string col in GetColumnNames())
+            foreach (string col in columnNames)
             {
                 data[col] = row[col];
             }
