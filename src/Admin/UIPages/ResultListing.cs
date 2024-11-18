@@ -58,17 +58,12 @@ public class ResultListing(
     public Task<ICommandResponse> ExportToJson() => Export(SqlBrowserExportType.Json);
 
 
-    [PageCommand]
-    public Task<ICommandResponse<RowActionResult>> ViewRecord(int id) =>
-        Task.FromResult(ResponseFrom(new RowActionResult(false)).AddSuccessMessage(sqlBrowserQueryProvider.GetRowAsText(id)));
-
-
     protected override object GetIdentifier(IDataContainer dataContainer) =>
         ValidationHelper.GetInteger(dataContainer[SqlBrowserResultProvider.ROW_IDENTIFIER_COLUMN], -1);
 
 
     protected override Task<IEnumerable<IDataContainer>> LoadDataContainers(CancellationToken cancellationToken) =>
-        Task.FromResult(sqlBrowserQueryProvider.GetRowsAsDataContainer());
+        sqlBrowserQueryProvider.GetRowsAsDataContainer();
 
 
     private void ConfigureColumns()
@@ -83,7 +78,7 @@ public class ResultListing(
     }
 
 
-    private Task<ICommandResponse> Export(SqlBrowserExportType exportType)
+    private async Task<ICommandResponse> Export(SqlBrowserExportType exportType)
     {
         string? exportedPath = null;
         try
@@ -91,13 +86,13 @@ public class ResultListing(
             switch (exportType)
             {
                 case SqlBrowserExportType.Csv:
-                    exportedPath = sqlBrowserExporter.ExportToCsv();
+                    exportedPath = await sqlBrowserExporter.ExportToCsv();
                     break;
                 case SqlBrowserExportType.Excel:
-                    exportedPath = sqlBrowserExporter.ExportToXls();
+                    exportedPath = await sqlBrowserExporter.ExportToXls();
                     break;
                 case SqlBrowserExportType.Json:
-                    exportedPath = sqlBrowserExporter.ExportToJson();
+                    exportedPath = await sqlBrowserExporter.ExportToJson();
                     break;
                 default:
                     break;
@@ -110,11 +105,11 @@ public class ResultListing(
 
         if (!string.IsNullOrEmpty(exportedPath))
         {
-            return Task.FromResult(Response().AddSuccessMessage($"Exported results to {exportedPath}"));
+            return Response().AddSuccessMessage($"Exported results to {exportedPath}");
         }
         else
         {
-            return Task.FromResult(Response().AddErrorMessage("Export failed, please check the Event log for errors"));
+            return Response().AddErrorMessage("Export failed, please check the Event log for errors");
         }
     }
 }

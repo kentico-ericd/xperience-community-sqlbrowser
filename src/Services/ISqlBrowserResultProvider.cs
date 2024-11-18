@@ -17,7 +17,7 @@ public interface ISqlBrowserResultProvider
     /// Gets a record from the current result set, transformed into a human-readable format.
     /// </summary>
     /// <param name="rowIdentifier">The identifier of the record to retrieve.</param>
-    public string GetRowAsText(int rowIdentifier);
+    public Task<string> GetRowAsText(int rowIdentifier);
 
 
     /// <summary>
@@ -36,13 +36,13 @@ public interface ISqlBrowserResultProvider
     /// Gets the current result set converted to <see cref="IDataContainer"/>s. Automatically sets the identifier for each container to
     /// be retrieved later by <see cref="GetRowAsText"/>.
     /// </summary>
-    public IEnumerable<IDataContainer> GetRowsAsDataContainer();
+    public Task<IEnumerable<IDataContainer>> GetRowsAsDataContainer();
 
 
     /// <summary>
     /// Gets the current result set converted to dynamic objects. 
     /// </summary>
-    public IEnumerable<dynamic> GetRowsAsDynamic();
+    public Task<IEnumerable<dynamic>> GetRowsAsDynamic();
 
 
     /// <summary>
