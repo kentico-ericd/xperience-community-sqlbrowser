@@ -1,4 +1,6 @@
-﻿using Kentico.Xperience.Admin.Base;
+﻿using CMS.Membership;
+
+using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.Admin.Base.UIPages;
 
 using XperienceCommunity.SqlBrowser.Admin;
@@ -47,7 +49,11 @@ namespace XperienceCommunity.SqlBrowser.Admin;
 /// <summary>
 /// The root application page for the SQL browser.
 /// </summary>
+[UIPermission(EXPORT_PERMISSION)]
+[UIPermission(SystemPermissions.VIEW)]
+[UIPermission(SystemPermissions.UPDATE, "Execute")]
 public class SqlBrowserApplicationPage : ApplicationPage
 {
+    public const string EXPORT_PERMISSION = "Export";
     public const string IDENTIFIER = "XperienceCommunity.SqlBrowser";
 }
