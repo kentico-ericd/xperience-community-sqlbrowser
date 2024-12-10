@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Authors>Eric Dugre</Authors>
-    <VersionPrefix>2.2.0</VersionPrefix>
+    <VersionPrefix>2.3.0</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/kentico-ericd/xperience-community-sqlbrowser</PackageProjectUrl>
