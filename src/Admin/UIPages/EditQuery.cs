@@ -1,14 +1,14 @@
-﻿using System.Data;
-using System.Text;
-using System.Text.RegularExpressions;
-
-using CMS.Core;
+﻿using CMS.Core;
 using CMS.DataEngine;
 using CMS.FormEngine;
 using CMS.Helpers;
+using CMS.Membership;
 
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.Admin.Base.Forms;
+
+using System.Data;
+using System.Text;
 
 using XperienceCommunity.SqlBrowser.Services;
 
@@ -18,6 +18,7 @@ namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
 /// Edit UI page for submitting query text to <see cref="ISqlBrowserResultProvider"/>. 
 /// </summary>
 [UINavigation(false)]
+[UIEvaluatePermission(SystemPermissions.VIEW)]
 public class EditQuery(
     IFormDataBinder binder,
     IFormComponentMapper formComponentMapper,
@@ -28,8 +29,6 @@ public class EditQuery(
 {
     private const string QUERY_FIELDNAME = "QueryText";
     private const string TABLES_FIELDNAME = "DatabaseTables";
-    private const string EOL_REPLACEMENT = "#EOL#";
-    private readonly Regex newLineRegex = RegexHelper.GetRegex(@"(<br[ ]?/>)|([\r]?\n)");
 
 
     public override async Task<EditTemplateClientProperties> ConfigureTemplateProperties(EditTemplateClientProperties properties)
@@ -99,7 +98,8 @@ public class EditQuery(
     }
 
 
-    protected ICollection<IFormComponent> GetFormComponents(IEnumerable<FormFieldInfo> formFields) => formComponentMapper.Map(formFields).ToList();
+    protected ICollection<IFormComponent> GetFormComponents(IEnumerable<FormFieldInfo> formFields) =>
+        formComponentMapper.Map(formFields).ToList();
 
 
     private FormInfo GetFormInfo()
@@ -164,16 +164,13 @@ public class EditQuery(
             builder
                 .Append("<u>")
                 .Append(group.Key)
-                .Append("</u>")
+                .Append("</u><br />")
                 .Append(Environment.NewLine)
                 .Append(string.Join(", ", columnNames))
-                .Append(Environment.NewLine)
-                .Append(Environment.NewLine);
+                .Append("<br /><br />");
         }
 
-        string resultText = newLineRegex.Replace(builder.ToString(), EOL_REPLACEMENT);
-
-        return resultText.Replace(EOL_REPLACEMENT, "<br />");
+        return builder.ToString();
     }
 
 

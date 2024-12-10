@@ -1,6 +1,7 @@
 ﻿using CMS.Base;
 using CMS.Core;
 using CMS.Helpers;
+using CMS.Membership;
 
 using Kentico.Xperience.Admin.Base;
 
@@ -13,12 +14,14 @@ namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
 /// Listing UI page which displays the results of a SQL query.
 /// </summary>
 [UINavigation(false)]
+[UIEvaluatePermission(SystemPermissions.VIEW)]
 public class ResultListing(
     ISqlBrowserResultProvider sqlBrowserQueryProvider,
     ISqlBrowserExporter sqlBrowserExporter,
-    IEventLogService eventLogService) : DataContainerListingPage
+    IEventLogService eventLogService,
+    IUIPermissionEvaluator permissionEvaluator) : DataContainerListingPage
 {
-    public override Task ConfigurePage()
+    public override async Task ConfigurePage()
     {
         int recordCount = sqlBrowserQueryProvider.GetTotalRecordCount();
         if (recordCount == 0)
@@ -36,25 +39,30 @@ public class ResultListing(
         {
             ConfigureColumns();
             PageConfiguration.Caption = $"Results ({recordCount})";
-            PageConfiguration.HeaderActions.AddCommand("Export to CSV", nameof(ExportToCsv));
-            PageConfiguration.HeaderActions.AddCommand("Export to Excel", nameof(ExportToXls));
-            PageConfiguration.HeaderActions.AddCommand("Export to JSON", nameof(ExportToJson));
+            var exportPermission = await permissionEvaluator.Evaluate(SqlBrowserApplicationPage.EXPORT_PERMISSION);
+            if (exportPermission.Succeeded)
+            {
+                PageConfiguration.HeaderActions.AddCommand("Export to CSV", nameof(ExportToCsv));
+                PageConfiguration.HeaderActions.AddCommand("Export to Excel", nameof(ExportToXls));
+                PageConfiguration.HeaderActions.AddCommand("Export to JSON", nameof(ExportToJson));
+            }
+
             PageConfiguration.AddEditRowAction<ViewRecord>();
         }
 
-        return base.ConfigurePage();
+        await base.ConfigurePage();
     }
 
 
-    [PageCommand]
+    [PageCommand(Permission = SqlBrowserApplicationPage.EXPORT_PERMISSION)]
     public Task<ICommandResponse> ExportToCsv() => Export(SqlBrowserExportType.Csv);
 
 
-    [PageCommand]
+    [PageCommand(Permission = SqlBrowserApplicationPage.EXPORT_PERMISSION)]
     public Task<ICommandResponse> ExportToXls() => Export(SqlBrowserExportType.Excel);
 
 
-    [PageCommand]
+    [PageCommand(Permission = SqlBrowserApplicationPage.EXPORT_PERMISSION)]
     public Task<ICommandResponse> ExportToJson() => Export(SqlBrowserExportType.Json);
 
 

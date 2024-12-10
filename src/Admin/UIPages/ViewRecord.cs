@@ -1,4 +1,5 @@
 ﻿using CMS.Helpers;
+using CMS.Membership;
 
 using System.Text.RegularExpressions;
 
@@ -12,9 +13,10 @@ namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
 /// <summary>
 /// Edit UI page which displays a database record in a dialog window.
 /// </summary>
-[UIPageLocation(PageLocationEnum.Dialog)]
 [UINavigation(false)]
 [UIBreadcrumbs(false)]
+[UIPageLocation(PageLocationEnum.Dialog)]
+[UIEvaluatePermission(SystemPermissions.VIEW)]
 public class ViewRecord(IFormDataBinder formDataBinder, ISqlBrowserResultProvider sqlBrowserResultProvider) : EditPageBase(formDataBinder)
 {
     private const string EOL_REPLACEMENT = "#EOL#";
@@ -27,6 +29,7 @@ public class ViewRecord(IFormDataBinder formDataBinder, ISqlBrowserResultProvide
     [PageParameter(typeof(IntPageModelBinder))]
     public int RecordId { get; set; }
 
+
     public override async Task ConfigurePage()
     {
         PageConfiguration.Disabled = true;
@@ -34,6 +37,7 @@ public class ViewRecord(IFormDataBinder formDataBinder, ISqlBrowserResultProvide
 
         await base.ConfigurePage();
     }
+
 
     public override async Task<EditTemplateClientProperties> ConfigureTemplateProperties(EditTemplateClientProperties properties)
     {
