@@ -11,7 +11,9 @@ This new module found in the __Development__ category allows users to execute SQ
 
 | Xperience Version | Library Version |
 | ----------------- | --------------- |
-| 29.x.y            | >=1.x.y         |
+|  >= 29.0.0        | >= 1.0.0        |
+
+> Note: The latest version that has been tested is __30.5.2__
 
 ## :gear: Package Installation
 
