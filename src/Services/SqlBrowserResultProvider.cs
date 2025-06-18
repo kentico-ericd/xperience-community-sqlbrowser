@@ -6,6 +6,8 @@ using CMS.Base;
 using CMS.Core;
 using CMS.DataEngine;
 
+using XperienceCommunity.SqlBrowser.Helpers;
+
 namespace XperienceCommunity.SqlBrowser.Services;
 
 /// <summary>
@@ -16,7 +18,7 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
     private string? query;
     private DataSet? result;
     public const string ROW_IDENTIFIER_COLUMN = $"{nameof(SqlBrowserResultProvider)}_result_identifier";
-
+    public static bool SafeQuerySelect { get; set; } = true;
 
     public IEnumerable<string> GetColumnNames()
     {
@@ -143,6 +145,19 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
 
         try
         {
+            if (SafeQuerySelect)
+            {
+                var validator = new SqlStatementValidator();
+                var validationResult = validator.ValidateSqlStatement(query);
+
+                if (!validationResult.IsValid)
+                {
+                    eventLogService.LogWarning(nameof(SqlBrowserResultProvider), nameof(EnsureResult),
+                       $"User attempted to execute invalid query:{Environment.NewLine}{query}{Environment.NewLine}Error: {validationResult.ErrorMessage}");
+                    throw new InvalidOperationException($"Invalid SQL query: {validationResult.ErrorMessage}");
+                }
+            }
+
             result = ConnectionHelper.ExecuteQuery(query, null, QueryTypeEnum.SQLQuery);
             eventLogService.LogInformation(nameof(SqlBrowserResultProvider), nameof(EnsureResult),
                 $"User executed query:{Environment.NewLine}{query}");

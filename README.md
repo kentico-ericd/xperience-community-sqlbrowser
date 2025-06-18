@@ -31,6 +31,32 @@ Add the following to your application's startup code:
 builder.Services.AddSqlBrowser();
 ```
 
+### Configuration Options
+
+You can customize the SQL Browser behavior with the following options:
+
+```cs
+builder.Services.AddSqlBrowser(options =>
+{
+    options.UseSafeQuerySelect = false;
+});
+```
+
+#### Available Options
+
+- **UseSafeQuerySelect** (default: `true`): Enable/disable SQL validation for enhanced security.
+
+When `UseSafeQuerySelect` is enabled (default), the following SQL statements are blocked:
+
+❌ **Data Modification**: INSERT, UPDATE, DELETE  
+❌ **Schema Operations**: CREATE, ALTER, DROP operations  
+❌ **Execution Statements**: EXECUTE statements  
+❌ **Dangerous Functions**: OPENROWSET, XP_CMDSHELL, etc.
+
+> **Security Note**: The validator uses Microsoft.SqlServer.TransactSql.ScriptDom for proper SQL parsing, ensuring it correctly identifies statement types and won't be fooled by SQL injection attempts or obfuscated queries.
+
+## Usage
+
 Open the new __SQL browser__ application in the __Development__ category. All database tables and columns are listed below for reference. Enter your SQL query and click "Run."
 
 ![Query](/images/editquery.png)
