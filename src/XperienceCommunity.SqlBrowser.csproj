@@ -19,6 +19,7 @@
 		<Folder Include="Admin\Client\dist\" />
 		<Compile Remove="Admin\Client\node_modules\**" />
 		<EmbeddedResource Remove="Admin\Client\node_modules\**" />
+		<Folder Include="Admin\Client\src\templates\" />
 		<None Remove="Admin\Client\node_modules\**" />
 	</ItemGroup>
 	

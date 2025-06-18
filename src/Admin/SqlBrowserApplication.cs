@@ -22,7 +22,7 @@ using XperienceCommunity.SqlBrowser.Admin.UIPages;
     slug: "new",
     uiPageType: typeof(EditQuery),
     name: "New query",
-    templateName: TemplateNames.EDIT,
+    templateName: "@xperience-community/sql-browser/EditQuery",
     order: UIPageOrder.First)]
 
 // Result page
