@@ -15,17 +15,14 @@ public static class StartupExtensions
     /// </summary>
     public static IServiceCollection AddSqlBrowser(this IServiceCollection services, Action<SqlBrowserOptions>? configureOptions = null)
     {
+        var options = new SqlBrowserOptions();
         if (configureOptions is not null)
         {
-            var options = new SqlBrowserOptions();
             configureOptions(options);
-            SqlBrowserResultProvider.SafeQuerySelect = options.UseSafeQuerySelect;
-        }
-        else
-        {
-            services.Configure<SqlBrowserOptions>(options => { });
         }
 
+        services.AddSingleton(options);
+        services.AddSingleton<ISqlQueryValidator, SqlQueryValidator>();
         services.AddSingleton<ISqlBrowserExporter, SqlBrowserExporter>();
         services.AddSingleton<ISqlBrowserResultProvider, SqlBrowserResultProvider>();
 

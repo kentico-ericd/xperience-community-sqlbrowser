@@ -2,22 +2,26 @@
 
 using XperienceCommunity.SqlBrowser.Models;
 
-namespace XperienceCommunity.SqlBrowser.Helpers;
-public class SqlStatementValidator
-{
-    private readonly TSql150Parser parser;
+namespace XperienceCommunity.SqlBrowser.Services;
 
-    public SqlStatementValidator() => parser = new TSql150Parser(true); // true for quoted identifiers
+/// <summary>
+/// Default implementation of <see cref="ISqlQueryValidator"/>.
+/// </summary>
+public class SqlQueryValidator(SqlBrowserOptions options) : ISqlQueryValidator
+{
+    private readonly TSql150Parser parser = new(true);
+
 
     public ValidationResult ValidateSqlStatement(string sqlStatement)
     {
+        if (!options.UseSafeQuerySelect)
+        {
+            return ValidResult();
+        }
+
         if (string.IsNullOrWhiteSpace(sqlStatement))
         {
-            return new ValidationResult
-            {
-                IsValid = false,
-                ErrorMessage = "SQL statement cannot be empty or null."
-            };
+            return InvalidResult("SQL statement cannot be empty or null.");
         }
 
         try
@@ -28,11 +32,7 @@ public class SqlStatementValidator
             // Check for parsing errors
             if (errors.Any())
             {
-                return new ValidationResult
-                {
-                    IsValid = false,
-                    ErrorMessage = $"SQL parsing error: {string.Join("; ", errors.Select(e => e.Message))}"
-                };
+                return InvalidResult($"SQL parsing error: {string.Join("; ", errors.Select(e => e.Message))}");
             }
 
             // Validate the statements
@@ -41,40 +41,50 @@ public class SqlStatementValidator
 
             if (!visitor.IsValid)
             {
-                return new ValidationResult
-                {
-                    IsValid = false,
-                    ErrorMessage = visitor.ErrorMessage
-                };
+                return InvalidResult(visitor.ErrorMessage);
             }
 
-            return new ValidationResult
-            {
-                IsValid = true,
-                ErrorMessage = null
-            };
+            return ValidResult();
         }
         catch (Exception ex)
         {
-            return new ValidationResult
-            {
-                IsValid = false,
-                ErrorMessage = $"Validation error: {ex.Message}"
-            };
+            return InvalidResult($"Validation error: {ex.Message}");
         }
     }
+
+
+    private static ValidationResult ValidResult() =>
+        new()
+        {
+            IsValid = true,
+            ErrorMessage = null
+        };
+
+
+    private static ValidationResult InvalidResult(string message) =>
+        new()
+        {
+            IsValid = false,
+            ErrorMessage = message
+        };
 }
 
-public class SqlStatementVisitor : TSqlFragmentVisitor
+
+internal class SqlStatementVisitor : TSqlFragmentVisitor
 {
     public bool IsValid { get; private set; } = true;
     public string ErrorMessage { get; private set; } = string.Empty;
-
+    private readonly HashSet<string> dangerousFunctions =
+    [
+        "OPENROWSET", "OPENDATASOURCE", "OPENQUERY", "OPENXML",
+        "XP_CMDSHELL", "SP_CONFIGURE", "BULK"
+    ];
     private readonly HashSet<Type> allowedStatementTypes =
     [
         typeof(SelectStatement),
         typeof(DeclareVariableStatement)
     ];
+
 
     public override void Visit(TSqlStatement node)
     {
@@ -83,18 +93,20 @@ public class SqlStatementVisitor : TSqlFragmentVisitor
         {
             IsValid = false;
             ErrorMessage = $"Statement type '{node.GetType().Name}' is not allowed. Only SELECT and DECLARE statements are permitted.";
+
             return;
         }
 
         base.Visit(node);
     }
 
-    // Explicitly block dangerous statements
+
     public override void Visit(InsertStatement node)
     {
         IsValid = false;
         ErrorMessage = "INSERT statements are not allowed.";
     }
+
 
     public override void Visit(UpdateStatement node)
     {
@@ -102,11 +114,13 @@ public class SqlStatementVisitor : TSqlFragmentVisitor
         ErrorMessage = "UPDATE statements are not allowed.";
     }
 
+
     public override void Visit(DeleteStatement node)
     {
         IsValid = false;
         ErrorMessage = "DELETE statements are not allowed.";
     }
+
 
     public override void Visit(CreateTableStatement node)
     {
@@ -114,11 +128,13 @@ public class SqlStatementVisitor : TSqlFragmentVisitor
         ErrorMessage = "CREATE TABLE statements are not allowed.";
     }
 
+
     public override void Visit(DropTableStatement node)
     {
         IsValid = false;
         ErrorMessage = "DROP TABLE statements are not allowed.";
     }
+
 
     public override void Visit(AlterTableStatement node)
     {
@@ -126,11 +142,13 @@ public class SqlStatementVisitor : TSqlFragmentVisitor
         ErrorMessage = "ALTER TABLE statements are not allowed.";
     }
 
+
     public override void Visit(TruncateTableStatement node)
     {
         IsValid = false;
         ErrorMessage = "TRUNCATE TABLE statements are not allowed.";
     }
+
 
     public override void Visit(CreateProcedureStatement node)
     {
@@ -138,26 +156,19 @@ public class SqlStatementVisitor : TSqlFragmentVisitor
         ErrorMessage = "CREATE PROCEDURE statements are not allowed.";
     }
 
+
     public override void Visit(ExecuteStatement node)
     {
         IsValid = false;
         ErrorMessage = "EXECUTE statements are not allowed.";
     }
 
-    // Allow comments - they don't generate visit calls, so no action needed
 
-    // Check for potentially dangerous functions in SELECT statements
     public override void Visit(FunctionCall node)
     {
+        // Check for potentially dangerous functions in SELECT statements
         string? functionName = node.FunctionName?.Value?.ToUpperInvariant();
-
-        var dangerousFunctions = new HashSet<string>
-        {
-            "OPENROWSET", "OPENDATASOURCE", "OPENQUERY", "OPENXML",
-            "XP_CMDSHELL", "SP_CONFIGURE", "BULK"
-        };
-
-        if (functionName != null && dangerousFunctions.Contains(functionName))
+        if (functionName is not null && dangerousFunctions.Contains(functionName))
         {
             IsValid = false;
             ErrorMessage = $"Function '{functionName}' is not allowed as it could be used for unauthorized operations.";

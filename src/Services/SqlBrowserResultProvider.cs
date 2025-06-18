@@ -6,19 +6,16 @@ using CMS.Base;
 using CMS.Core;
 using CMS.DataEngine;
 
-using XperienceCommunity.SqlBrowser.Helpers;
-
 namespace XperienceCommunity.SqlBrowser.Services;
 
 /// <summary>
 /// Default implementation of <see cref="ISqlBrowserResultProvider"/>.
 /// </summary>
-public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBrowserResultProvider
+public class SqlBrowserResultProvider(IEventLogService eventLogService, ISqlQueryValidator validator) : ISqlBrowserResultProvider
 {
     private string? query;
     private DataSet? result;
     public const string ROW_IDENTIFIER_COLUMN = $"{nameof(SqlBrowserResultProvider)}_result_identifier";
-    public static bool SafeQuerySelect { get; set; } = true;
 
     public IEnumerable<string> GetColumnNames()
     {
@@ -145,17 +142,14 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
 
         try
         {
-            if (SafeQuerySelect)
+            var validationResult = validator.ValidateSqlStatement(query);
+            if (!validationResult.IsValid)
             {
-                var validator = new SqlStatementValidator();
-                var validationResult = validator.ValidateSqlStatement(query);
+                result = new DataSet();
+                eventLogService.LogWarning(nameof(SqlBrowserResultProvider), nameof(EnsureResult),
+                    $"User attempted to execute invalid query:{Environment.NewLine}{query}{Environment.NewLine}Error: {validationResult.ErrorMessage}");
 
-                if (!validationResult.IsValid)
-                {
-                    eventLogService.LogWarning(nameof(SqlBrowserResultProvider), nameof(EnsureResult),
-                       $"User attempted to execute invalid query:{Environment.NewLine}{query}{Environment.NewLine}Error: {validationResult.ErrorMessage}");
-                    throw new InvalidOperationException($"Invalid SQL query: {validationResult.ErrorMessage}");
-                }
+                return;
             }
 
             result = ConnectionHelper.ExecuteQuery(query, null, QueryTypeEnum.SQLQuery);
