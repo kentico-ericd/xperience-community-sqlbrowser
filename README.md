@@ -5,15 +5,15 @@
 
 ## Description
 
-This new module found in the __Development__ category allows users to execute SQL queries within the administration UI and view the results in a table. SQL results can be exported to common file types, and result rows can be clicked for a detailed view.
+This new module found in the **Development** category allows users to execute SQL queries within the administration UI and view the results in a table. SQL results can be exported to common file types, and result rows can be clicked for a detailed view.
 
 ## Library Version Matrix
 
 | Xperience Version | Library Version |
 | ----------------- | --------------- |
-|  >= 29.0.0        | >= 1.0.0        |
+| >= 29.0.0         | >= 1.0.0        |
 
-> Note: The latest version that has been tested is __30.5.2__
+> Note: The latest version that has been tested is **30.5.2**
 
 ## :gear: Package Installation
 
@@ -42,22 +42,24 @@ builder.Services.AddSqlBrowser(options =>
 });
 ```
 
-#### Available Options
+The following options are currently available:
 
-- **UseSafeQuerySelect** (default: `true`): Enable/disable SQL validation for enhanced security.
+| Property name      | Default value | Description                                         |
+| ------------------ | ------------- | --------------------------------------------------- |
+| UseSafeQuerySelect | `true`        | Enable/disable SQL validation for enhanced security |
 
-When `UseSafeQuerySelect` is enabled (default), the following SQL statements are blocked:
+When `UseSafeQuerySelect` is enabled, the following SQL statements are blocked:
 
-❌ **Data Modification**: INSERT, UPDATE, DELETE  
-❌ **Schema Operations**: CREATE, ALTER, DROP operations  
-❌ **Execution Statements**: EXECUTE statements  
-❌ **Dangerous Functions**: OPENROWSET, XP_CMDSHELL, etc.
+- **Data Modification**: INSERT, UPDATE, DELETE
+- **Schema Operations**: CREATE, ALTER, DROP operations
+- **Execution Statements**: EXECUTE statements
+- **Dangerous Functions**: OPENROWSET, XP_CMDSHELL, etc.
 
 > **Security Note**: The validator uses Microsoft.SqlServer.TransactSql.ScriptDom for proper SQL parsing, ensuring it correctly identifies statement types and won't be fooled by SQL injection attempts or obfuscated queries.
 
 ## Usage
 
-Open the new __SQL browser__ application in the __Development__ category. All database tables and columns are listed below for reference. Enter your SQL query and click "Run."
+Open the new **SQL browser** application in the **Development** category. All database tables and columns are listed below for reference. Enter your SQL query and click "Run."
 
 ![Query](/images/editquery.png)
 
