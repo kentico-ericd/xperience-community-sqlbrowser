@@ -19,4 +19,10 @@ public class EditSqlTemplateClientProperties : TemplateClientProperties
     /// The query to pre-fill in the editor text area.
     /// </summary>
     public string? Query { get; set; }
+
+
+    /// <summary>
+    /// The saved SQL queries in the database.
+    /// </summary>
+    public IEnumerable<SavedQuery> SavedQueries { get; set; } = [];
 }

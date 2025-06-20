@@ -10,6 +10,7 @@ using System.Data;
 using XperienceCommunity.SqlBrowser.Admin.UIPages.Properties;
 using XperienceCommunity.SqlBrowser.Services;
 using XperienceCommunity.SqlBrowser.Models;
+using XperienceCommunity.SqlBrowser.Admin.Generated;
 
 namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
 
@@ -22,7 +23,8 @@ public class EditQuery(
     IEventLogService eventLogService,
     IProgressiveCache cache,
     ISqlBrowserResultProvider sqlBrowserResultProvider,
-    IPageLinkGenerator pageLinkGenerator) : Page<EditSqlTemplateClientProperties>
+    IPageLinkGenerator pageLinkGenerator,
+    IInfoProvider<SqlBrowserSavedQueryInfo> savedQueryProvider) : Page<EditSqlTemplateClientProperties>
 {
     public override Task<EditSqlTemplateClientProperties> ConfigureTemplateProperties(EditSqlTemplateClientProperties properties)
     {
@@ -35,17 +37,72 @@ public class EditQuery(
         properties.Tables = tables;
         properties.Query = sqlBrowserResultProvider.GetQuery();
 
+        var savedQueries = savedQueryProvider.Get()
+            .GetEnumerableTypedResult()
+            .Select(q => new SavedQuery(q));
+        properties.SavedQueries = savedQueries;
+
         return Task.FromResult(properties);
     }
 
 
-    [PageCommand(CommandName = "RunSql")]
+    [PageCommand(CommandName = nameof(RunSql))]
     public Task<ICommandResponse> RunSql(string query)
     {
         sqlBrowserResultProvider.SetQuery(query);
         string navigationUrl = pageLinkGenerator.GetPath<ResultListing>();
 
         return Task.FromResult((ICommandResponse)NavigateTo(navigationUrl));
+    }
+
+
+    [PageCommand(CommandName = nameof(DeleteQuery))]
+    public Task<ICommandResponse> DeleteQuery(int id)
+    {
+        var query = savedQueryProvider.Get()
+            .TopN(1)
+            .WhereEquals(nameof(SqlBrowserSavedQueryInfo.SqlBrowserSavedQueryId), id)
+            .FirstOrDefault();
+        if (query is null)
+        {
+            return Task.FromResult(Response().AddErrorMessage($"Query {id} not found"));
+        }
+
+        query.Delete();
+
+        return Task.FromResult(Response().AddSuccessMessage("Query deleted! Reload the page to view the updated list"));
+    }
+
+
+    [PageCommand(CommandName = nameof(SaveQuery))]
+    public Task<ICommandResponse> SaveQuery(string[] parameters)
+    {
+        if (parameters.Length < 2)
+        {
+            return Task.FromResult(Response().AddErrorMessage("Received incorrect number of parameters"));
+        }
+
+        string name = parameters[0];
+        string text = parameters[1];
+        if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(text))
+        {
+            return Task.FromResult(Response().AddErrorMessage("Received empty parameter"));
+        }
+
+        try
+        {
+            new SqlBrowserSavedQueryInfo
+            {
+                SqlBrowserSavedQueryName = name,
+                SqlBrowserSavedQueryText = text
+            }.Insert();
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult(Response().AddErrorMessage(ex.Message));
+        }
+
+        return Task.FromResult(Response().AddSuccessMessage("Query saved! Reload the page to view the updated list"));
     }
 
 
