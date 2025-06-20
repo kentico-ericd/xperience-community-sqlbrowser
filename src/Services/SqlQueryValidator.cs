@@ -101,6 +101,34 @@ internal class SqlStatementVisitor : TSqlFragmentVisitor
     }
 
 
+    public override void Visit(TSqlFragment fragment)
+    {
+        // Workaround for parser missing OpenDataSourceTableReference
+        if (fragment.ScriptTokenStream.Any(token => !string.IsNullOrEmpty(token.Text) &&
+            token.Text.Equals("OPENDATASOURCE", StringComparison.OrdinalIgnoreCase)))
+        {
+            IsValid = false;
+            ErrorMessage = "Function 'OPENDATASOURCE' is not allowed as it could be used for unauthorized operations.";
+        }
+    }
+
+
+    public override void Visit(FunctionCall node)
+    {
+        // Check for potentially dangerous functions in SELECT statements
+        string? functionName = node.FunctionName?.Value?.ToUpperInvariant();
+        if (functionName is not null && dangerousFunctions.Contains(functionName))
+        {
+            IsValid = false;
+            ErrorMessage = $"Function '{functionName}' is not allowed as it could be used for unauthorized operations.";
+
+            return;
+        }
+
+        base.Visit(node);
+    }
+
+
     public override void Visit(InsertStatement node)
     {
         IsValid = false;
@@ -161,21 +189,6 @@ internal class SqlStatementVisitor : TSqlFragmentVisitor
     {
         IsValid = false;
         ErrorMessage = "EXECUTE statements are not allowed.";
-    }
-
-
-    public override void Visit(FunctionCall node)
-    {
-        // Check for potentially dangerous functions in SELECT statements
-        string? functionName = node.FunctionName?.Value?.ToUpperInvariant();
-        if (functionName is not null && dangerousFunctions.Contains(functionName))
-        {
-            IsValid = false;
-            ErrorMessage = $"Function '{functionName}' is not allowed as it could be used for unauthorized operations.";
-            return;
-        }
-
-        base.Visit(node);
     }
 
 

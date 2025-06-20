@@ -5,8 +5,8 @@ namespace XperienceCommunity.SqlBrowser.Tests;
 public class SqlQueryValidatorTests
 {
     private static readonly string[] unsafeStatements = [
-        "INSERT INTO CMS_User",
-        "UPDATE CMS_User",
+        "INSERT INTO CMS_Country VALUES ('MyCountry', 'My country', NEWID(), GETDATE(), 'my', 'myc')",
+        "UPDATE CMS_User SET UserEnabled = 0",
         "DELETE FROM CMS_User",
         "CREATE TABLE test (test_id int)",
         "DROP TABLE CMS_User",
@@ -16,7 +16,7 @@ public class SqlQueryValidatorTests
         "CREATE PROC test AS SELECT UserID FROM CMS_User",
         "EXECUTE ('SELECT * FROM CMS_User')",
         "EXEC ('SELECT * FROM CMS_User')",
-        "SELECT 1;INSERT INTO CMS_User",
+        "SELECT 1;INSERT INTO CMS_Country VALUES ('MyCountry', 'My country', NEWID(), GETDATE(), 'my', 'myc')",
         "SELECT * FROM OPENROWSET('SQLNCLI', 'Server=.;Trusted_Connection=yes;', 'SELECT * FROM sys.tables')",
         "SELECT * FROM OPENDATASOURCE('MSOLEDBSQL', 'Server=myserver;Database=mydb;TrustServerCertificate=Yes;Trusted_Connection=Yes;').MyTable",
         "SELECT * FROM OPENQUERY(MyServer, 'DELETE FROM CMS_User')",
@@ -45,7 +45,14 @@ public class SqlQueryValidatorTests
         var validator = GetValidator(true);
         var result = validator.ValidateSqlStatement(query);
 
-        Assert.That(result.IsValid, Is.False);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsValid, Is.False);
+            // Ensure error message is from visit and not generic error
+            Assert.That(result.ErrorMessage, Does.Not.Contain("Validation error"));
+            Assert.That(result.ErrorMessage, Does.Not.Contain("SQL parsing error"));
+            Assert.That(result.ErrorMessage, Is.Not.EqualTo("SQL statement cannot be empty or null."));
+        });
     }
 
 
