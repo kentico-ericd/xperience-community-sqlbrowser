@@ -17,6 +17,8 @@
 		<PackageReference Include="CsvHelper" />
 		<PackageReference Include="Kentico.Xperience.WebApp" />
 		<PackageReference Include="Kentico.Xperience.Admin" />
+		<PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" />
 		<PackageReference Include="NPOI" />
+		
 	</ItemGroup>
 </Project>
