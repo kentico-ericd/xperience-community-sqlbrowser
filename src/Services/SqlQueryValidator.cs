@@ -177,4 +177,23 @@ internal class SqlStatementVisitor : TSqlFragmentVisitor
 
         base.Visit(node);
     }
+
+
+    public override void Visit(OpenRowsetTableReference node)
+    {
+        IsValid = false;
+        ErrorMessage = "OPENROWSET function is not allowed as it could be used for unauthorized operations.";
+    }
+
+    public override void Visit(OpenQueryTableReference node)
+    {
+        IsValid = false;
+        ErrorMessage = "OPENQUERY function is not allowed as it could be used for unauthorized operations.";
+    }
+
+    public override void Visit(OpenXmlTableReference node)
+    {
+        IsValid = false;
+        ErrorMessage = "OPENXML function is not allowed as it could be used for unauthorized operations.";
+    }
 }
