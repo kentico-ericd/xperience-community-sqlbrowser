@@ -11,12 +11,11 @@ namespace XperienceCommunity.SqlBrowser.Services;
 /// <summary>
 /// Default implementation of <see cref="ISqlBrowserResultProvider"/>.
 /// </summary>
-public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBrowserResultProvider
+public class SqlBrowserResultProvider(IEventLogService eventLogService, ISqlQueryValidator validator) : ISqlBrowserResultProvider
 {
     private string? query;
     private DataSet? result;
     public const string ROW_IDENTIFIER_COLUMN = $"{nameof(SqlBrowserResultProvider)}_result_identifier";
-
 
     public IEnumerable<string> GetColumnNames()
     {
@@ -143,6 +142,16 @@ public class SqlBrowserResultProvider(IEventLogService eventLogService) : ISqlBr
 
         try
         {
+            var validationResult = validator.ValidateSqlStatement(query);
+            if (!validationResult.IsValid)
+            {
+                result = new DataSet();
+                eventLogService.LogWarning(nameof(SqlBrowserResultProvider), nameof(EnsureResult),
+                    $"User attempted to execute invalid query:{Environment.NewLine}{query}{Environment.NewLine}Error: {validationResult.ErrorMessage}");
+
+                return;
+            }
+
             result = ConnectionHelper.ExecuteQuery(query, null, QueryTypeEnum.SQLQuery);
             eventLogService.LogInformation(nameof(SqlBrowserResultProvider), nameof(EnsureResult),
                 $"User executed query:{Environment.NewLine}{query}");
