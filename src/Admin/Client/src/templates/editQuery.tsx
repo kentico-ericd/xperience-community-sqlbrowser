@@ -42,8 +42,32 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
     const [queryText, setQueryText] = useState(props.query);
     const { execute: runSql } = usePageCommand<void, string>("RunSql");
     const { execute: notify } = usePageCommand<void, string>("Notify");
-    const { execute: saveQuery } = usePageCommand<void, string[]>("SaveQuery");
-    const { execute: deleteQuery } = usePageCommand<void, number>("DeleteQuery");
+    /**
+     * Save handler accepts a SavedQuery with text and name, without ID. Returned object contains new database record's ID.
+     */
+    const { execute: saveQuery } = usePageCommand<SavedQuery, SavedQuery>("SaveQuery", {
+        after: newQuery => {
+            if (!newQuery) {
+                return;
+            }
+
+            props.savedQueries.push(newQuery);
+            renderSavedQueries();
+        }
+    });
+    /**
+     * Delete handler accepts the ID to delete, and returns the ID of the deleted record or zero.
+     */
+    const { execute: deleteQuery } = usePageCommand<number, number>("DeleteQuery", {
+        after: id => {
+            if (!id || id <= 0) {
+                return;
+            }
+
+            props.savedQueries = props.savedQueries.filter(q => q.id !== id);
+            renderSavedQueries();
+        }
+    });
 
     const renderSavedQueries = () => {
         return props.savedQueries.map(q =>
@@ -77,9 +101,11 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
      */
     const deleteClick = (id: number) => {
         var confirmed = confirm('Are you sure you want to delete this query?');
-        if (confirmed) {
-            deleteQuery(id);
+        if (!confirmed) {
+            return;
         }
+
+        deleteQuery(id);
     };
 
     /**
@@ -110,26 +136,39 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
     };
 
     /**
+     * Click handler for clearing the editor text.
+     */
+    const clearClick = () => {
+        if (!textAreaRef.current) {
+            return;
+        }
+
+        setQueryText('');
+        textAreaRef.current.textContent = '';
+    };
+
+    /**
      * Click handler to execute the current text.
      */
     const runClick = () => {
-        if (queryText && queryText.length > 0) {
-            runSql(queryText);
-        }
-        else {
+        if (!queryText || queryText.length <= 0) {
             alert('Please enter a query to execute.');
+
+            return;
         }
+
+        runSql(queryText);
     };
 
     /**
      * Click handler for copying the current text to clipboard.
      */
     const copyClick = async () => {
-        if (!textAreaRef.current?.textContent) {
+        if (!queryText || queryText.length <= 0) {
             return;
         }
 
-        await navigator.clipboard.writeText(textAreaRef.current.textContent);
+        await navigator.clipboard.writeText(queryText);
         notify('Query copied to clipboard');
     };
 
@@ -137,7 +176,9 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
      * Click handler for saving the current text as new SQL query.
      */
     const saveClick = async () => {
-        if (!textAreaRef.current?.textContent) {
+        if (!queryText || queryText.length <= 0) {
+            alert('Please enter a query in the editor');
+
             return;
         }
 
@@ -146,7 +187,7 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
             return;
         }
 
-        saveQuery([name, textAreaRef.current.textContent]);
+        saveQuery({ id: 0, name: name, text: queryText });
     };
 
     return (
@@ -166,8 +207,9 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
                                 onChange={(e) => setQueryText(e.target.value)}
                                 renderActions={() => (
                                     <>
-                                        <Button label='Copy' size={ButtonSize.S} onClick={copyClick} icon='xp-doc-copy' />
-                                        <Button label='Save' size={ButtonSize.S} onClick={saveClick} icon='xp-doc-plus' />
+                                        <Button label='Save' color={ButtonColor.Primary} size={ButtonSize.S} onClick={saveClick} icon='xp-doc-plus' />
+                                        <Button label='Copy' color={ButtonColor.Tertiary} size={ButtonSize.S} onClick={copyClick} icon='xp-doc-copy' />
+                                        <Button label='Clear' color={ButtonColor.Tertiary} size={ButtonSize.S} onClick={clearClick} icon='xp-doc-torn' />
                                     </>
                                 )} />
                         </Card>

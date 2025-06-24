@@ -55,7 +55,7 @@ public class EditQuery(
 
 
     [PageCommand(CommandName = nameof(DeleteQuery))]
-    public Task<ICommandResponse> DeleteQuery(int id)
+    public Task<ICommandResponse<int>> DeleteQuery(int id)
     {
         var query = savedQueryProvider.Get()
             .TopN(1)
@@ -63,44 +63,39 @@ public class EditQuery(
             .FirstOrDefault();
         if (query is null)
         {
-            return Task.FromResult(Response().AddErrorMessage($"Query {id} not found"));
+            return Task.FromResult(ResponseFrom(0).AddErrorMessage($"Query {id} not found"));
         }
 
         query.Delete();
 
-        return Task.FromResult(Response().AddSuccessMessage("Query deleted! Reload the page to view the updated list"));
+        return Task.FromResult(ResponseFrom(id).AddSuccessMessage("Query deleted!"));
     }
 
 
     [PageCommand(CommandName = nameof(SaveQuery))]
-    public Task<ICommandResponse> SaveQuery(string[] parameters)
+    public Task<ICommandResponse<SavedQuery?>> SaveQuery(SavedQuery query)
     {
-        if (parameters.Length < 2)
+        if (string.IsNullOrEmpty(query.Name) || string.IsNullOrEmpty(query.Text))
         {
-            return Task.FromResult(Response().AddErrorMessage("Received incorrect number of parameters"));
-        }
-
-        string name = parameters[0];
-        string text = parameters[1];
-        if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(text))
-        {
-            return Task.FromResult(Response().AddErrorMessage("Received empty parameter"));
+            return Task.FromResult(ResponseFrom<SavedQuery?>(null).AddErrorMessage("Received empty parameter"));
         }
 
         try
         {
-            new SqlBrowserSavedQueryInfo
+            var newQuery = new SqlBrowserSavedQueryInfo
             {
-                SqlBrowserSavedQueryName = name,
-                SqlBrowserSavedQueryText = text
-            }.Insert();
+                SqlBrowserSavedQueryName = query.Name,
+                SqlBrowserSavedQueryText = query.Text
+            };
+            newQuery.Insert();
+            query.ID = newQuery.SqlBrowserSavedQueryId;
+
+            return Task.FromResult(ResponseFrom<SavedQuery?>(query).AddSuccessMessage("Query saved!"));
         }
         catch (Exception ex)
         {
-            return Task.FromResult(Response().AddErrorMessage(ex.Message));
+            return Task.FromResult(ResponseFrom<SavedQuery?>(null).AddErrorMessage(ex.Message));
         }
-
-        return Task.FromResult(Response().AddSuccessMessage("Query saved! Reload the page to view the updated list"));
     }
 
 
