@@ -32,7 +32,7 @@ public class ViewRecord(IFormDataBinder formDataBinder, ISqlBrowserResultProvide
 
     public override async Task ConfigurePage()
     {
-        PageConfiguration.Disabled = true;
+        PageConfiguration.EditMode = FormEditMode.Disabled;
         PageConfiguration.SubmitConfiguration.Visible = false;
 
         await base.ConfigurePage();
@@ -46,8 +46,8 @@ public class ViewRecord(IFormDataBinder formDataBinder, ISqlBrowserResultProvide
         properties.Items = [
             new TextWithLabelClientProperties()
             {
-                Disabled = true,
                 ValueAsHtml = true,
+                EditMode = FormEditMode.Disabled,
                 ComponentName = "@kentico/xperience-admin-base/TextWithLabel",
                 Value = HTMLHelper.HTMLEncode(text).Replace(EOL_REPLACEMENT, "<br />"),
             }

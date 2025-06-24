@@ -58,7 +58,7 @@ public partial class SqlBrowserSavedQueryInfo : AbstractInfo<SqlBrowserSavedQuer
     [DatabaseField]
     public virtual Guid SqlBrowserSavedQueryGuid
     {
-        get => ValidationHelper.GetGuid(GetValue(nameof(SqlBrowserSavedQueryGuid)), default);
+        get => ValidationHelper.GetGuid(GetValue(nameof(SqlBrowserSavedQueryGuid)), Guid.Empty);
         set => SetValue(nameof(SqlBrowserSavedQueryGuid), value);
     }
 

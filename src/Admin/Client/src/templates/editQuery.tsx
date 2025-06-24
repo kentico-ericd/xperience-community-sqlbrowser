@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     ActionMenu,
     ActionMenuHeadline,
+    BarItem,
     Button,
     ButtonColor,
     ButtonSize,
@@ -12,22 +13,24 @@ import {
     Row,
     Spacing,
     Stack,
-    TextArea,
-    BarItem
+    TextArea
 } from '@kentico/xperience-admin-components';
 import { usePageCommand } from '@kentico/xperience-admin-base';
 
+/** Copy of C# DatabaseTable class */
 interface DatabaseTable {
     name: string;
     columns: string[];
 }
 
+/** Copy of C# SavedQuery class */
 interface SavedQuery {
     id: number;
     name: string;
     text: string;
 }
 
+/** Copy of C# EditSqlTemplateClientProperties class */
 interface EditQueryClientProperties {
     tables: DatabaseTable[];
     query: string | undefined;
@@ -36,7 +39,9 @@ interface EditQueryClientProperties {
 
 export const EditQueryTemplate = (props: EditQueryClientProperties) => {
     const textAreaRef = React.createRef<HTMLTextAreaElement>();
+    const [queryText, setQueryText] = useState(props.query);
     const { execute: runSql } = usePageCommand<void, string>("RunSql");
+    const { execute: notify } = usePageCommand<void, string>("Notify");
     const { execute: saveQuery } = usePageCommand<void, string[]>("SaveQuery");
     const { execute: deleteQuery } = usePageCommand<void, number>("DeleteQuery");
 
@@ -71,38 +76,45 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
      * Click handler to delete a saved query.
      */
     const deleteClick = (id: number) => {
-        deleteQuery(id);
+        var confirmed = confirm('Are you sure you want to delete this query?');
+        if (confirmed) {
+            deleteQuery(id);
+        }
     };
 
     /**
      * Click handler to transfer the text of a saved query to the text box.
      */
     const transferClick = (text: string) => {
-        if (textAreaRef.current) {
-            textAreaRef.current.textContent = text;
+        if (!textAreaRef.current) {
+            return;
         }
+
+        setQueryText(text);
+        textAreaRef.current.textContent = text;
+        notify('Query copied to editor');
     };
 
     /**
      * Click handler for table name in listing to generate SELECT query.
      */
     const generateQuery = (table: DatabaseTable) => {
-        const q = `SELECT ${table.columns.join(', ')} FROM ${table.name}`;
-        if (textAreaRef.current) {
-            textAreaRef.current.textContent = q;
+        if (!textAreaRef.current) {
+            return;
         }
+
+        const q = `SELECT ${table.columns.join(', ')} FROM ${table.name}`;
+        setQueryText(q);
+        textAreaRef.current.textContent = q;
+        notify('SQL query generated');
     };
 
     /**
      * Click handler to execute the current text.
      */
     const runClick = () => {
-        if (!textAreaRef.current) {
-            return;
-        }
-
-        if (textAreaRef.current.textContent) {
-            runSql(textAreaRef.current.textContent);
+        if (queryText && queryText.length > 0) {
+            runSql(queryText);
         }
         else {
             alert('Please enter a query to execute.');
@@ -113,9 +125,12 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
      * Click handler for copying the current text to clipboard.
      */
     const copyClick = async () => {
-        if (textAreaRef.current) {
-            await navigator.clipboard.writeText(textAreaRef.current.textContent ?? '');
+        if (!textAreaRef.current?.textContent) {
+            return;
         }
+
+        await navigator.clipboard.writeText(textAreaRef.current.textContent);
+        notify('Query copied to clipboard');
     };
 
     /**
@@ -135,38 +150,36 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
     };
 
     return (
-        <>
-            <Stack spacing={Spacing.XL}>
-                <Button label="Run" color={ButtonColor.Primary} onClick={runClick} /><br/>
+        <Stack spacing={Spacing.XL}>
+            <Button label='Run' color={ButtonColor.Primary} onClick={runClick} /><br/>
 
-                <Row spacing={Spacing.XL}>
-                    <Column cols={Cols.Col10}>
-                        <Stack spacing={Spacing.XL}>
-                            <Card headline='Query'>
-                                <TextArea
-                                    minRows={10}
-                                    maxRows={40}
-                                    invalid={false}
-                                    disabled={false}
-                                    readOnly={false}
-                                    value={props.query ?? ''}
-                                    textAreaRef={textAreaRef}
-                                    placeholder='Enter SQL query...'
-                                    renderActions={() => (
-                                        <>
-                                            <Button label='Copy' size={ButtonSize.S} onClick={copyClick} icon='xp-doc-copy' />
-                                            <Button label='Save' size={ButtonSize.S} onClick={saveClick} icon='xp-doc-plus' />
-                                        </>
-                                    )} />
+            <Row spacing={Spacing.XL}>
+                <Column cols={Cols.Col10}>
+                    <Stack spacing={Spacing.XL}>
+                        <Card headline='Query'>
+                            <TextArea
+                                minRows={10}
+                                maxRows={40}
+                                value={queryText}
+                                textAreaRef={textAreaRef}
+                                placeholder='Enter SQL query...'
+                                onChange={(e) => setQueryText(e.target.value)}
+                                renderActions={() => (
+                                    <>
+                                        <Button label='Copy' size={ButtonSize.S} onClick={copyClick} icon='xp-doc-copy' />
+                                        <Button label='Save' size={ButtonSize.S} onClick={saveClick} icon='xp-doc-plus' />
+                                    </>
+                                )} />
+                        </Card>
+                        {props.savedQueries.length > 0 &&
+                            <Card headline='Saved queries'>
+                                {renderSavedQueries()}
                             </Card>
-                            {props.savedQueries.length > 0 &&
-                                <Card headline='Saved queries'>
-                                    {renderSavedQueries()}
-                                </Card>
-                            }
-                        </Stack>
-                    </Column>
+                        }
+                    </Stack>
+                </Column>
 
+                {(props.tables.length > 0) &&
                     <Column cols={Cols.Col2}>
                         <ActionMenu>
                             <ActionMenuHeadline label='Tables' />
@@ -177,8 +190,8 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
                             }
                         </ActionMenu>
                     </Column>
-                </Row>
-            </Stack>
-        </>
+                }
+            </Row>
+        </Stack>
     );
 };

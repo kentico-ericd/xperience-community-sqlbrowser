@@ -28,22 +28,20 @@ public class EditQuery(
 {
     public override Task<EditSqlTemplateClientProperties> ConfigureTemplateProperties(EditSqlTemplateClientProperties properties)
     {
-        var tables = cache.Load(LoadTables, new CacheSettings(10, $"{nameof(EditQuery)}|{nameof(ConfigureTemplateProperties)}"));
-        if (!tables.Any())
-        {
-            throw new InvalidOperationException();
-        }
-
-        properties.Tables = tables;
+        properties.Tables =
+            cache.Load(LoadTables, new CacheSettings(10, $"{nameof(EditQuery)}|{nameof(ConfigureTemplateProperties)}"));
         properties.Query = sqlBrowserResultProvider.GetQuery();
-
-        var savedQueries = savedQueryProvider.Get()
+        properties.SavedQueries = savedQueryProvider.Get()
             .GetEnumerableTypedResult()
             .Select(q => new SavedQuery(q));
-        properties.SavedQueries = savedQueries;
 
         return Task.FromResult(properties);
     }
+
+
+    [PageCommand(CommandName = nameof(Notify))]
+    public Task<ICommandResponse> Notify(string message) =>
+        Task.FromResult(Response().AddSuccessMessage(message));
 
 
     [PageCommand(CommandName = nameof(RunSql))]
