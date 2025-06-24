@@ -11,6 +11,7 @@ using XperienceCommunity.SqlBrowser.Admin.UIPages.Properties;
 using XperienceCommunity.SqlBrowser.Services;
 using XperienceCommunity.SqlBrowser.Models;
 using XperienceCommunity.SqlBrowser.Admin.Generated;
+using CMS.FormEngine;
 
 namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
 
@@ -26,25 +27,23 @@ public class EditQuery(
     IPageLinkGenerator pageLinkGenerator,
     IInfoProvider<SqlBrowserSavedQueryInfo> savedQueryProvider) : Page<EditSqlTemplateClientProperties>
 {
-    public override Task<EditSqlTemplateClientProperties> ConfigureTemplateProperties(EditSqlTemplateClientProperties properties)
+    public override async Task<EditSqlTemplateClientProperties> ConfigureTemplateProperties(EditSqlTemplateClientProperties properties)
     {
         properties.Tables =
             cache.Load(LoadTables, new CacheSettings(10, $"{nameof(EditQuery)}|{nameof(ConfigureTemplateProperties)}"));
         properties.Query = sqlBrowserResultProvider.GetQuery();
-        properties.SavedQueries = savedQueryProvider.Get()
-            .GetEnumerableTypedResult()
-            .Select(q => new SavedQuery(q));
+        properties.SavedQueries = (await GetSavedQueries()).Select(q => new SavedQuery(q));
 
-        return Task.FromResult(properties);
+        return properties;
     }
 
 
-    [PageCommand(CommandName = nameof(Notify))]
+    [PageCommand]
     public Task<ICommandResponse> Notify(string message) =>
         Task.FromResult(Response().AddSuccessMessage(message));
 
 
-    [PageCommand(CommandName = nameof(RunSql))]
+    [PageCommand]
     public Task<ICommandResponse> RunSql(string query)
     {
         sqlBrowserResultProvider.SetQuery(query);
@@ -54,7 +53,7 @@ public class EditQuery(
     }
 
 
-    [PageCommand(CommandName = nameof(DeleteQuery))]
+    [PageCommand]
     public Task<ICommandResponse<int>> DeleteQuery(int id)
     {
         var query = savedQueryProvider.Get()
@@ -72,7 +71,7 @@ public class EditQuery(
     }
 
 
-    [PageCommand(CommandName = nameof(SaveQuery))]
+    [PageCommand]
     public Task<ICommandResponse<SavedQuery?>> SaveQuery(SavedQuery query)
     {
         if (string.IsNullOrEmpty(query.Name) || string.IsNullOrEmpty(query.Text))
@@ -80,14 +79,25 @@ public class EditQuery(
             return Task.FromResult(ResponseFrom<SavedQuery?>(null).AddErrorMessage("Received empty parameter"));
         }
 
+        int newOrder = 0;
+        var queryOrders = savedQueryProvider.Get()
+            .AsSingleColumn(nameof(SqlBrowserSavedQueryInfo.SqlBrowserSavedQueryOrder))
+            .GetListResult<int>();
+        if (queryOrders.Any())
+        {
+            newOrder = queryOrders.Max() + 1;
+        }
+
         try
         {
             var newQuery = new SqlBrowserSavedQueryInfo
             {
                 SqlBrowserSavedQueryName = query.Name,
-                SqlBrowserSavedQueryText = query.Text
+                SqlBrowserSavedQueryText = query.Text,
+                SqlBrowserSavedQueryOrder = newOrder
             };
             newQuery.Insert();
+            query.Order = newOrder;
             query.ID = newQuery.SqlBrowserSavedQueryId;
 
             return Task.FromResult(ResponseFrom<SavedQuery?>(query).AddSuccessMessage("Query saved!"));
@@ -97,6 +107,32 @@ public class EditQuery(
             return Task.FromResult(ResponseFrom<SavedQuery?>(null).AddErrorMessage(ex.Message));
         }
     }
+
+
+    [PageCommand]
+    public async Task<ICommandResponse<bool>> UpdateSavedOrder(SavedQuery[] newOrder)
+    {
+        var originalQueries = (await GetSavedQueries()).ToList();
+        foreach (var newQuery in newOrder)
+        {
+            var original = originalQueries.Find(q => q.SqlBrowserSavedQueryId == newQuery.ID);
+            if (original is null)
+            {
+                return ResponseFrom(false).AddErrorMessage($"Failed to update order: query {newQuery.ID} not found");
+            }
+
+            original.SqlBrowserSavedQueryOrder = newQuery.Order;
+            original.Update();
+        }
+
+        return ResponseFrom(true);
+    }
+
+
+    private Task<IEnumerable<SqlBrowserSavedQueryInfo>> GetSavedQueries() =>
+        savedQueryProvider.Get()
+            .OrderBy(nameof(SqlBrowserSavedQueryInfo.SqlBrowserSavedQueryOrder))
+            .GetEnumerableTypedResultAsync();
 
 
     private IEnumerable<DatabaseTable> LoadTables(CacheSettings cs)

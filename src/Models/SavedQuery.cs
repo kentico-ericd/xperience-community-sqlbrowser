@@ -16,10 +16,14 @@ public class SavedQuery()
     public string? Text { get; set; }
 
 
+    public int Order { get; set; }
+
+
     public SavedQuery(SqlBrowserSavedQueryInfo source) : this()
     {
         ID = source.SqlBrowserSavedQueryId;
         Name = source.SqlBrowserSavedQueryName;
         Text = source.SqlBrowserSavedQueryText;
+        Order = source.SqlBrowserSavedQueryOrder;
     }
 }

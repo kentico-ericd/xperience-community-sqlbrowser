@@ -86,6 +86,17 @@ public partial class SqlBrowserSavedQueryInfo : AbstractInfo<SqlBrowserSavedQuer
 
 
     /// <summary>
+    /// Saved query ordering index.
+    /// </summary>
+    [DatabaseField]
+    public virtual int SqlBrowserSavedQueryOrder
+    {
+        get => ValidationHelper.GetInteger(GetValue(nameof(SqlBrowserSavedQueryOrder)), 0);
+        set => SetValue(nameof(SqlBrowserSavedQueryOrder), value);
+    }
+
+
+    /// <summary>
     /// Deletes the object using appropriate provider.
     /// </summary>
     protected override void DeleteObject() => Provider.Delete(this);

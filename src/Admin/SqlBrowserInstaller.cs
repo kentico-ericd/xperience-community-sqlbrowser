@@ -85,6 +85,17 @@ public class SqlBrowserInstaller(IInfoProvider<ResourceInfo> resourceProvider)
         };
         formInfo.AddFormItem(formItem);
 
+        formItem = new FormFieldInfo
+        {
+            Name = nameof(SqlBrowserSavedQueryInfo.SqlBrowserSavedQueryOrder),
+            AllowEmpty = false,
+            Visible = true,
+            Precision = 0,
+            DataType = "integer",
+            Enabled = true
+        };
+        formInfo.AddFormItem(formItem);
+
         SetFormDefinition(info, formInfo);
 
         if (info.HasChanged)

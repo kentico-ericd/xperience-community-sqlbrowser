@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import {
     ActionMenu,
     ActionMenuHeadline,
-    BarItem,
+    BarItemDraggable,
+    BarItemGroup,
     Button,
     ButtonColor,
     ButtonSize,
@@ -15,7 +16,7 @@ import {
     Stack,
     TextArea
 } from '@kentico/xperience-admin-components';
-import { usePageCommand } from '@kentico/xperience-admin-base';
+import { usePageCommand, usePageCommandProvider } from '@kentico/xperience-admin-base';
 
 /** Copy of C# DatabaseTable class */
 interface DatabaseTable {
@@ -28,6 +29,7 @@ interface SavedQuery {
     id: number;
     name: string;
     text: string;
+    order: number;
 }
 
 /** Copy of C# EditSqlTemplateClientProperties class */
@@ -38,12 +40,14 @@ interface EditQueryClientProperties {
 }
 
 export const EditQueryTemplate = (props: EditQueryClientProperties) => {
+    const { executeCommand } = usePageCommandProvider();
     const textAreaRef = React.createRef<HTMLTextAreaElement>();
     const [queryText, setQueryText] = useState(props.query);
+    const [savedQueries, setSavedQueries] = useState(props.savedQueries);
     const { execute: runSql } = usePageCommand<void, string>("RunSql");
     const { execute: notify } = usePageCommand<void, string>("Notify");
     /**
-     * Save handler accepts a SavedQuery with text and name, without ID. Returned object contains new database record's ID.
+     * Save handler accepts a SavedQuery with only text and name. Returned object contains all properties of the database record.
      */
     const { execute: saveQuery } = usePageCommand<SavedQuery, SavedQuery>("SaveQuery", {
         after: newQuery => {
@@ -51,7 +55,7 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
                 return;
             }
 
-            props.savedQueries.push(newQuery);
+            savedQueries.push(newQuery);
             renderSavedQueries();
         }
     });
@@ -64,14 +68,17 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
                 return;
             }
 
-            props.savedQueries = props.savedQueries.filter(q => q.id !== id);
+            setSavedQueries(savedQueries.filter(q => q.id !== id));
             renderSavedQueries();
         }
     });
 
     const renderSavedQueries = () => {
-        return props.savedQueries.map(q =>
-            <BarItem
+        return savedQueries.map(q =>
+            <BarItemDraggable
+                key={q.name}
+                index={q.order}
+                draggableId={q.id.toString()}
                 leadingButtons={[
                     {
                         label: 'Copy',
@@ -92,7 +99,7 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
                     }
                 ]}>
                 <span>{q.text}</span>
-            </BarItem>
+            </BarItemDraggable>
         );
     };
 
@@ -187,7 +194,36 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
             return;
         }
 
-        saveQuery({ id: 0, name: name, text: queryText });
+        saveQuery({ id: 0, order: 0, name: name, text: queryText });
+    };
+
+    /**
+     * Handler after re-ordering the saved queries bar items.
+     */
+    const savedQueryDragEnd = async (dropResult: any) => {
+        if (dropResult.source.index === dropResult.destination?.index) {
+            return;
+        }
+
+        const sourceIndex = dropResult.source.index;
+        const destinationIndex = dropResult.destination?.index || 0;
+        const newQueries = updateQueryOrder(savedQueries, sourceIndex, destinationIndex);
+        const updateSuccessful = await executeCommand<boolean, SavedQuery[]>("UpdateSavedOrder", newQueries);
+
+        if (!updateSuccessful) {
+            updateQueryOrder(newQueries, destinationIndex, sourceIndex);
+        }
+    };
+
+
+    const updateQueryOrder = (oldQueries: SavedQuery[], sourceIndex: number, destinationIndex: number) => {
+        const newQueries = [...oldQueries];
+        const [sourceField] = newQueries.splice(sourceIndex, 1);
+        newQueries.splice(destinationIndex, 0, sourceField);
+        newQueries.forEach((query, i) => query.order = i);
+        setSavedQueries(newQueries);
+
+        return newQueries;
     };
 
     return (
@@ -215,7 +251,9 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
                         </Card>
                         {props.savedQueries.length > 0 &&
                             <Card headline='Saved queries'>
-                                {renderSavedQueries()}
+                                <BarItemGroup droppableId='savedQueryDroppable' onDragEnd={savedQueryDragEnd}>
+                                    {renderSavedQueries()}
+                                </BarItemGroup>
                             </Card>
                         }
                     </Stack>
