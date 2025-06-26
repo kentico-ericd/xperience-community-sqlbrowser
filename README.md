@@ -11,9 +11,8 @@ This new module found in the **Development** category allows users to execute SQ
 
 | Xperience Version | Library Version |
 | ----------------- | --------------- |
-| >= 29.0.0         | >= 1.0.0        |
-
-> Note: The latest version that has been tested is **30.5.2**
+| >= 29.0.0         | < 3.0.0         |
+| >= 30.6.0         | >= 3.0.0        |
 
 ## :gear: Package Installation
 
@@ -31,38 +30,6 @@ Add the following to your application's startup code:
 builder.Services.AddSqlBrowser();
 ```
 
-### Configuration Options
+## Full Instructions
 
-You can customize the SQL Browser behavior with the following options:
-
-```cs
-builder.Services.AddSqlBrowser(options =>
-{
-    options.UseSafeQuerySelect = false;
-});
-```
-
-The following options are currently available:
-
-| Property name      | Default value | Description                                         |
-| ------------------ | ------------- | --------------------------------------------------- |
-| UseSafeQuerySelect | `true`        | Enable/disable SQL validation for enhanced security |
-
-When `UseSafeQuerySelect` is enabled, the following SQL statements are blocked:
-
-- **Data Modification**: INSERT, UPDATE, DELETE
-- **Schema Operations**: CREATE, ALTER, DROP operations
-- **Execution Statements**: EXECUTE statements
-- **Dangerous Functions**: OPENROWSET, XP_CMDSHELL, etc.
-
-> **Security Note**: The validator uses Microsoft.SqlServer.TransactSql.ScriptDom for proper SQL parsing, ensuring it correctly identifies statement types and won't be fooled by SQL injection attempts or obfuscated queries.
-
-## Usage
-
-Open the new **SQL browser** application in the **Development** category. All database tables and columns are listed below for reference. Enter your SQL query and click "Run."
-
-![Query](/images/editquery.png)
-
-The results of your query will be displayed in a table. Click on an individual row to view the full detail of that row's columns. The result set can be exported using the buttons above the table.
-
-![Results](/images/results.png)
+View the [Usage Guide](docs/Usage-Guide.md) for more detailed instructions.
