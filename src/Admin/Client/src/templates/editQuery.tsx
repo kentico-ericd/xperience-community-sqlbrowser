@@ -55,21 +55,26 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
                 return;
             }
 
-            savedQueries.push(newQuery);
-            renderSavedQueries();
+            const newQueries = [...savedQueries];
+            newQueries.push(newQuery);
+            setSavedQueries(newQueries);
         }
     });
     /**
      * Delete handler accepts the ID to delete, and returns the ID of the deleted record or zero.
      */
     const { execute: deleteQuery } = usePageCommand<number, number>("DeleteQuery", {
-        after: id => {
+        after: async id => {
             if (!id || id <= 0) {
                 return;
             }
 
-            setSavedQueries(savedQueries.filter(q => q.id !== id));
-            renderSavedQueries();
+            const newQueries = savedQueries.filter(q => q.id !== id);
+
+            // Sorting can bug if there is missing index in ordering- update orders in UI and backend
+            newQueries.forEach((query, i) => query.order = i);
+            setSavedQueries(newQueries);
+            await executeCommand<boolean, SavedQuery[]>("UpdateSavedOrder", newQueries);
         }
     });
 
