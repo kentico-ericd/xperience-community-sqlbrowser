@@ -58,11 +58,11 @@ public class ViewRecord(IFormDataBinder formDataBinder, ISqlBrowserResultProvide
 
 
     protected override Task<ICollection<IFormItem>> GetFormItems() =>
-        Task.FromResult(Array.Empty<IFormItem>() as ICollection<IFormItem>);
+        Task.FromResult<ICollection<IFormItem>>([]);
 
 
     protected override Task<IEnumerable<IFormItemClientProperties>> GetFormItemsClientProperties() =>
-        Task.FromResult(Enumerable.Empty<IFormItemClientProperties>());
+        Task.FromResult<IEnumerable<IFormItemClientProperties>>([]);
 
 
     protected override Task<ICommandResponse> SubmitInternal(
