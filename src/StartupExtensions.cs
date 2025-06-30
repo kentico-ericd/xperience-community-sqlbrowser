@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
+using XperienceCommunity.SqlBrowser.Admin;
 using XperienceCommunity.SqlBrowser.Models;
 using XperienceCommunity.SqlBrowser.Services;
 
@@ -22,6 +23,7 @@ public static class StartupExtensions
         }
 
         services.AddSingleton(options);
+        services.AddSingleton<SqlBrowserInstaller>();
         services.AddSingleton<ISqlQueryValidator, SqlQueryValidator>();
         services.AddSingleton<ISqlBrowserExporter, SqlBrowserExporter>();
         services.AddSingleton<ISqlBrowserResultProvider, SqlBrowserResultProvider>();

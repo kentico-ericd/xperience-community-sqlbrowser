@@ -1,0 +1,41 @@
+{
+  "name": "xperience-community-sql-browser",
+  "version": "1.0.0",
+  "description": "SQL browser admin project",
+  "private": true,
+  "scripts": {
+    "start": "webpack serve --mode development",
+    "build": "webpack --mode=production"
+  },
+  "dependencies": {
+    "@kentico/xperience-admin-base": "30.6.0",
+    "@kentico/xperience-admin-components": "30.6.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.27.1",
+    "@babel/plugin-transform-runtime": "^7.27.1",
+    "@babel/preset-env": "^7.27.2",
+    "@babel/preset-react": "^7.27.1",
+    "@babel/preset-typescript": "^7.27.1",
+    "@kentico/xperience-webpack-config": "30.5.2",
+    "@types/react": "^18.3.21",
+    "@types/react-dom": "^18.3.7",
+    "babel-loader": "^10.0.0",
+    "webpack": "5.99.8",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.1"
+  },
+  "overrides": {
+    "react": "$react",
+    "react-dom": "$react",
+    "json-joy": ">= 11.19.0"
+  },
+  "browserslist": [
+    "> .2% and last 3 versions",
+    "not op_mini all",
+    "not IE 11"
+  ]
+}
+

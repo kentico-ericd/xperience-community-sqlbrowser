@@ -89,22 +89,16 @@ public class ResultListing(
     private async Task<ICommandResponse> Export(SqlBrowserExportType exportType)
     {
         string? exportedPath = null;
+
         try
         {
-            switch (exportType)
+            exportedPath = exportType switch
             {
-                case SqlBrowserExportType.Csv:
-                    exportedPath = await sqlBrowserExporter.ExportToCsv();
-                    break;
-                case SqlBrowserExportType.Excel:
-                    exportedPath = await sqlBrowserExporter.ExportToXls();
-                    break;
-                case SqlBrowserExportType.Json:
-                    exportedPath = await sqlBrowserExporter.ExportToJson();
-                    break;
-                default:
-                    break;
-            }
+                SqlBrowserExportType.Csv => await sqlBrowserExporter.ExportToCsv(),
+                SqlBrowserExportType.Excel => await sqlBrowserExporter.ExportToXls(),
+                SqlBrowserExportType.Json => await sqlBrowserExporter.ExportToJson(),
+                _ => string.Empty
+            };
         }
         catch (Exception ex)
         {

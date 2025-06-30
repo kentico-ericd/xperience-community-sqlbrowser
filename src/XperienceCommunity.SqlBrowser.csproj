@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<AdminOrgName>xperiencecommunity</AdminOrgName>
+		<AdminOrgName>xperience-community</AdminOrgName>
 		<RootNamespace>XperienceCommunity.SqlBrowser</RootNamespace>
 		<NoWarn>$(NoWarn);S1075</NoWarn>
 		<LangVersion>latest</LangVersion>
@@ -9,6 +9,19 @@
 		<HotChocolateImplicitUsings>disable</HotChocolateImplicitUsings>
 	</PropertyGroup>
 
+	<ItemGroup>
+		<AdminClientPath Include="Admin\Client\dist\**">
+			<ProjectName>sql-browser</ProjectName>
+		</AdminClientPath>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Admin\Client\dist\" />
+		<Compile Remove="Admin\Client\node_modules\**" />
+		<EmbeddedResource Remove="Admin\Client\node_modules\**" />
+		<None Remove="Admin\Client\node_modules\**" />
+	</ItemGroup>
+	
 	<ItemGroup>
 		<AssemblyAttribute Include="CMS.AssemblyDiscoverableAttribute"></AssemblyAttribute>
 	</ItemGroup>
@@ -19,6 +32,5 @@
 		<PackageReference Include="Kentico.Xperience.Admin" />
 		<PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" />
 		<PackageReference Include="NPOI" />
-		
 	</ItemGroup>
 </Project>
