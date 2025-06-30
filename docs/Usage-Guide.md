@@ -30,9 +30,7 @@ The validator uses Microsoft.SqlServer.TransactSql.ScriptDom for proper SQL pars
 
 ## Executing Queries
 
-Open the new **SQL browser** application in the **Development** category. All database tables are listed on the right side for reference, and you can click a table to automatically generate a SELECT query for that table.
-
-Enter your SQL query and click "Run."
+Open the new **SQL browser** application in the **Development** category. Enter your SQL query and click "Run." A list of all tables in your database can be seen by clicking the **Tables** button in the editor. If you click a table name, a SELECT query will be generated for you.
 
 ![Query](/images/editquery.png)
 
@@ -46,4 +44,6 @@ If you have a query you'd like to run often, or very long and complex queries, y
 
 First, enter your query in the text box then click **Save**. You will be prompted to enter a name for the query- this is in the identifier format, so it will not accept spaces and some special characters. Once confirmed, you will see a new box below the editor which lists your saved queries.
 
-To run a saved query, click the "Copy" icon (the paper) and the query will be pasted into the editor. You can then click **Run** to execute it, or modify it if needed. Queries can also be re-ordered by dragging, and deleted using the "Trash" icon.
+Saved queries can be re-ordered by dragging the items up and down the list. To run a query, click the "Execute" icon. There are some additional options in the menu, such as copying the query's text to the editor, and deleting the query:
+
+![More options](/images/additionaloptions.png)

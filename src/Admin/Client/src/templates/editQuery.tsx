@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { RefObject, useState } from 'react';
 import {
     ActionMenu,
     ActionMenuHeadline,
@@ -10,8 +10,10 @@ import {
     Card,
     Cols,
     Column,
+    DropDownSelectMenu,
     MenuItem,
     Row,
+    SelectMenu,
     Spacing,
     Stack,
     TextArea
@@ -77,36 +79,6 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
             await executeCommand<boolean, SavedQuery[]>("UpdateSavedOrder", newQueries);
         }
     });
-
-    const renderSavedQueries = () => {
-        return savedQueries.map(q =>
-            <BarItemDraggable
-                key={q.name}
-                index={q.order}
-                draggableId={q.id.toString()}
-                leadingButtons={[
-                    {
-                        label: 'Copy',
-                        icon: 'xp-doc-copy',
-                        tooltip: 'Copy query to text box',
-                        onClick: () => transferClick(q.text)
-                    },
-                    {
-                        label: 'Delete',
-                        icon: 'xp-bin',
-                        tooltip: 'Delete',
-                        onClick: () => deleteClick(q.id)
-                    }
-                ]}
-                headerColumns={[
-                    {
-                        content: <span>{q.name}</span>
-                    }
-                ]}>
-                <span>{q.text}</span>
-            </BarItemDraggable>
-        );
-    };
 
     /**
      * Click handler to delete a saved query.
@@ -231,52 +203,91 @@ export const EditQueryTemplate = (props: EditQueryClientProperties) => {
         return newQueries;
     };
 
+    const renderSavedQueries = () =>
+        savedQueries.map(q =>
+            <BarItemDraggable
+                key={q.name}
+                index={q.order}
+                draggableId={q.id.toString()}
+                leadingButtons={[
+                    {
+                        label: 'Run',
+                        icon: 'xp-caret-right',
+                        tooltip: 'Execute query',
+                        onClick: () => runSql(q.text)
+                    },
+                    {
+                        label: 'Copy',
+                        icon: 'xp-doc-copy',
+                        tooltip: 'Copy query to text box',
+                        onClick: () => transferClick(q.text)
+                    },
+                    {
+                        label: 'Delete',
+                        icon: 'xp-bin',
+                        tooltip: 'Delete',
+                        onClick: () => deleteClick(q.id)
+                    }
+                ]}
+                headerColumns={[
+                    {
+                        content: <span>{q.name}</span>
+                    }
+                ]}>
+                <span>{q.text}</span>
+            </BarItemDraggable>
+        );
+
+    const renderTextActions = () =>
+        <>
+            <Button label='Save' color={ButtonColor.Primary} size={ButtonSize.S} onClick={saveClick} icon='xp-doc-plus' />
+            <Button label='Copy' color={ButtonColor.Tertiary} size={ButtonSize.S} onClick={copyClick} icon='xp-doc-copy' />
+            <Button label='Clear' color={ButtonColor.Tertiary} size={ButtonSize.S} onClick={clearClick} icon='xp-doc-torn' />
+            {props.tables.length > 0 &&
+                <DropDownSelectMenu renderTrigger={(ref, onTriggerClick) => (
+                    <Button
+                        label='Tables'
+                        size={ButtonSize.S}
+                        borderless
+                        icon='xp-database'
+                        buttonRef={ref as RefObject<HTMLButtonElement>}
+                        onClick={() => onTriggerClick()} />
+                )}>
+                    {
+                        props.tables.map(table =>
+                            <MenuItem primaryLabel={table.name} onClick={() => generateQuery(table)} />
+                        )
+                    }
+                </DropDownSelectMenu>
+            }
+        </>
+
     return (
-        <Stack spacing={Spacing.XL}>
-            <Button label='Run' color={ButtonColor.Primary} onClick={runClick} /><br/>
-
-            <Row spacing={Spacing.XL}>
-                <Column cols={Cols.Col10}>
-                    <Stack spacing={Spacing.XL}>
-                        <Card headline='Query'>
-                            <TextArea
-                                minRows={10}
-                                maxRows={40}
-                                value={queryText}
-                                textAreaRef={textAreaRef}
-                                placeholder='Enter SQL query...'
-                                onChange={(e) => setQueryText(e.target.value)}
-                                renderActions={() => (
-                                    <>
-                                        <Button label='Save' color={ButtonColor.Primary} size={ButtonSize.S} onClick={saveClick} icon='xp-doc-plus' />
-                                        <Button label='Copy' color={ButtonColor.Tertiary} size={ButtonSize.S} onClick={copyClick} icon='xp-doc-copy' />
-                                        <Button label='Clear' color={ButtonColor.Tertiary} size={ButtonSize.S} onClick={clearClick} icon='xp-doc-torn' />
-                                    </>
-                                )} />
+        <Row spacing={Spacing.XL}>
+            <Column cols={Cols.Col1} />
+            <Column cols={Cols.Col10}>
+                <Stack spacing={Spacing.XL}>
+                    <Button label='Run' icon='xp-caret-right' color={ButtonColor.Primary} onClick={runClick} />
+                    <Card headline='Query'>
+                        <TextArea
+                            minRows={10}
+                            maxRows={40}
+                            value={queryText}
+                            textAreaRef={textAreaRef}
+                            placeholder='Enter SQL query...'
+                            onChange={(e) => setQueryText(e.target.value)}
+                            renderActions={renderTextActions} />
+                    </Card>
+                    {props.savedQueries.length > 0 &&
+                        <Card headline='Saved queries'>
+                            <BarItemGroup droppableId='savedQueryDroppable' onDragEnd={savedQueryDragEnd}>
+                                {renderSavedQueries()}
+                            </BarItemGroup>
                         </Card>
-                        {props.savedQueries.length > 0 &&
-                            <Card headline='Saved queries'>
-                                <BarItemGroup droppableId='savedQueryDroppable' onDragEnd={savedQueryDragEnd}>
-                                    {renderSavedQueries()}
-                                </BarItemGroup>
-                            </Card>
-                        }
-                    </Stack>
-                </Column>
-
-                {(props.tables.length > 0) &&
-                    <Column cols={Cols.Col2}>
-                        <ActionMenu>
-                            <ActionMenuHeadline label='Tables' />
-                            {
-                                props.tables.map(table =>
-                                    <MenuItem primaryLabel={table.name} onClick={() => generateQuery(table)} />
-                                )
-                            }
-                        </ActionMenu>
-                    </Column>
-                }
-            </Row>
-        </Stack>
+                    }
+                </Stack>
+            </Column>
+            <Column cols={Cols.Col1} />
+        </Row>
     );
 };

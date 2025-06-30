@@ -72,7 +72,7 @@ public class SqlBrowserExporter(ISqlBrowserResultProvider sqlBrowserResultProvid
         var columnNames = sqlBrowserResultProvider.GetColumnNames();
         var dynamics = await sqlBrowserResultProvider.GetRowsAsDynamic();
 
-        IWorkbook workbook = new XSSFWorkbook();
+        var workbook = new XSSFWorkbook();
         var excelSheet = workbook.CreateSheet("Sheet1");
 
         var row = excelSheet.CreateRow(0);
