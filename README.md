@@ -12,7 +12,7 @@ This new module found in the **Development** category allows users to execute SQ
 | Xperience Version | Library Version |
 | ----------------- | --------------- |
 | >= 29.0.0         | < 3.0.0         |
-| >= 30.6.0         | >= 3.0.0        |
+| >= 30.6.0         | >= 3.0.1        |
 
 ## :gear: Package Installation
 
