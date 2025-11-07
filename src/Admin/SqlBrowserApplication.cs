@@ -19,9 +19,9 @@ using XperienceCommunity.SqlBrowser.Admin.UIPages;
 // Edit page
 [assembly: UIPage(
     parentType: typeof(SqlBrowserApplicationPage),
-    slug: "new",
+    slug: "queries",
     uiPageType: typeof(EditQuery),
-    name: "New query",
+    name: "Queries",
     templateName: "@xperience-community/sql-browser/EditQuery",
     order: UIPageOrder.First)]
 
@@ -41,6 +41,15 @@ using XperienceCommunity.SqlBrowser.Admin.UIPages;
     uiPageType: typeof(ViewRecord),
     name: "View record",
     templateName: TemplateNames.EDIT,
+    order: UIPageOrder.NoOrder)]
+
+// Export listing
+[assembly: UIPage(
+    parentType: typeof(SqlBrowserApplicationPage),
+    slug: "exports",
+    uiPageType: typeof(ExportListing),
+    name: "Exported data",
+    templateName: TemplateNames.LISTING,
     order: UIPageOrder.NoOrder)]
 
 

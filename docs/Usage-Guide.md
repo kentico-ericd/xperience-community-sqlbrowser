@@ -34,9 +34,13 @@ Open the new **SQL browser** application in the **Development** category. Enter 
 
 ![Query](/images/editquery.png)
 
-The results of your query will be displayed in a table. Click on an individual row to view the full detail of that row's columns. The result set can be exported using the buttons above the table.
+The results of your query will be displayed in a table. Click on an individual row to view the full detail of that row's columns.
 
 ![Results](/images/results.png)
+
+## Exporting results
+
+After executing a query, click the buttons in the listing header to export the results to the server's ~/App_Data/Export folder. To view the contents of this folder, click the **Exported data** navigation item in the side menu. Here, you can download individual export files to your local machine, or delete the files from the server.
 
 ## Saving queries
 

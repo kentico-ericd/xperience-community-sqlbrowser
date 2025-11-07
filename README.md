@@ -13,6 +13,7 @@ This new module found in the **Development** category allows users to execute SQ
 | ----------------- | --------------- |
 | >= 29.0.0         | < 3.0.0         |
 | >= 30.6.0         | >= 3.0.1        |
+| >= 30.11.2        | >= 4.0.0        |
 
 ## :gear: Package Installation
 
