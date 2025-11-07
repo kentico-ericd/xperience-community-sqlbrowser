@@ -24,4 +24,7 @@ public interface ISqlBrowserExporter
     /// </summary>
     /// <returns>The path of the resulting file.</returns>
     public Task<string> ExportToJson();
+
+
+    public string GetExportDirectory();
 }

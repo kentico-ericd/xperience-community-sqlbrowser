@@ -43,6 +43,15 @@ using XperienceCommunity.SqlBrowser.Admin.UIPages;
     templateName: TemplateNames.EDIT,
     order: UIPageOrder.NoOrder)]
 
+// Export listing
+[assembly: UIPage(
+    parentType: typeof(SqlBrowserApplicationPage),
+    slug: "exports",
+    uiPageType: typeof(ExportListing),
+    name: "Exported data",
+    templateName: TemplateNames.LISTING,
+    order: UIPageOrder.NoOrder)]
+
 
 namespace XperienceCommunity.SqlBrowser.Admin;
 

@@ -16,6 +16,9 @@ namespace XperienceCommunity.SqlBrowser.Services;
 /// </summary>
 public class SqlBrowserExporter(ISqlBrowserResultProvider sqlBrowserResultProvider) : ISqlBrowserExporter
 {
+    private const string EXPORT_DIRECTORY = "App_Data\\Export";
+
+
     public async Task<string> ExportToCsv()
     {
         string path = GetExportPath(".csv");
@@ -53,11 +56,13 @@ public class SqlBrowserExporter(ISqlBrowserResultProvider sqlBrowserResultProvid
         return path;
     }
 
+    public string GetExportDirectory() => Path.Combine(SystemContext.WebApplicationPhysicalPath, EXPORT_DIRECTORY);
 
-    private static string GetExportPath(string extension)
+
+    private string GetExportPath(string extension)
     {
         string fileName = DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + extension;
-        string folder = Path.Combine(SystemContext.WebApplicationPhysicalPath, $"App_Data\\Export");
+        string folder = GetExportDirectory();
         if (!Directory.Exists(folder))
         {
             Directory.CreateDirectory(folder);
