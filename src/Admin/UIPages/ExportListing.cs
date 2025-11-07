@@ -12,12 +12,12 @@ namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
 [UIEvaluatePermission(SystemPermissions.VIEW)]
 public class ExportListing(ISqlBrowserExporter sqlBrowserExporter) : DataContainerListingPage
 {
+    private const string FILESIZE_COLUMN = "filesize";
     private const string ROW_IDENTIFIER_COLUMN = "export_filename";
 
 
     public override async Task ConfigurePage()
     {
-        PageConfiguration.ColumnConfigurations.AddColumn(ROW_IDENTIFIER_COLUMN, "Name");
         PageConfiguration.ColumnConfigurations
             .AddComponentColumn(
                 "download",
@@ -30,10 +30,13 @@ public class ExportListing(ISqlBrowserExporter sqlBrowserExporter) : DataContain
                     },
                 loadedExternally: true,
                 sortable: false);
+        PageConfiguration.ColumnConfigurations.AddColumn(ROW_IDENTIFIER_COLUMN, "Name");
+        PageConfiguration.ColumnConfigurations.AddColumn(FILESIZE_COLUMN, "Size (KB)");
         PageConfiguration.TableActions.AddDeleteAction(nameof(DeleteExport));
 
         await base.ConfigurePage();
     }
+
 
     [PageCommand]
     public Task<ICommandResponse<RowActionResult>> DeleteExport(string fileName)
@@ -83,9 +86,12 @@ public class ExportListing(ISqlBrowserExporter sqlBrowserExporter) : DataContain
         string[] files = Directory.GetFiles(exportDirectory);
         foreach (string file in files)
         {
+            var fileInfo = new FileInfo(file);
+            double fileSizeInKB = (double)fileInfo.Length / 1024;
             rows.Add(new DataContainer
             {
-                [ROW_IDENTIFIER_COLUMN] = Path.GetFileName(file)
+                [ROW_IDENTIFIER_COLUMN] = Path.GetFileName(file),
+                [FILESIZE_COLUMN] = Math.Round(fileSizeInKB, 2)
             });
         }
 

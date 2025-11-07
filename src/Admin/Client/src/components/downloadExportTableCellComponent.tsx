@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Button, ButtonColor } from '@kentico/xperience-admin-components';
+import { Button, ButtonColor, ButtonSize } from '@kentico/xperience-admin-components';
 import { usePageCommandProvider } from '@kentico/xperience-admin-base';
 
 interface DownloadExportClientProperties {
@@ -26,8 +26,10 @@ export const DownloadExportTableCellComponent = (props: DownloadExportClientProp
 
     return (
         <Button
-            icon='xp-caret-right'
-            color={ButtonColor.Primary}
+            icon='xp-arrow-down-line'
+            color={ButtonColor.Quinary}
+            size={ButtonSize.S}
+            borderless={true}
             onClick={() => handleExportDownload()} />
     );
 };
