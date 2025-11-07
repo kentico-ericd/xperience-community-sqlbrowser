@@ -17,7 +17,7 @@ namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
 /// <summary>
 /// Edit UI page for submitting query text to <see cref="ISqlBrowserResultProvider"/>. 
 /// </summary>
-[UINavigation(false)]
+[UINavigation(true)]
 [UIEvaluatePermission(SystemPermissions.VIEW)]
 public class EditQuery(
     IEventLogService eventLogService,

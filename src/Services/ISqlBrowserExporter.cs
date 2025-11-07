@@ -26,5 +26,8 @@ public interface ISqlBrowserExporter
     public Task<string> ExportToJson();
 
 
+    /// <summary>
+    /// Gets the full system path of the directory which stores exported SQL query results.
+    /// </summary>
     public string GetExportDirectory();
 }

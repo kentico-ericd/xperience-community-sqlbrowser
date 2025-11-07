@@ -19,9 +19,9 @@ using XperienceCommunity.SqlBrowser.Admin.UIPages;
 // Edit page
 [assembly: UIPage(
     parentType: typeof(SqlBrowserApplicationPage),
-    slug: "new",
+    slug: "queries",
     uiPageType: typeof(EditQuery),
-    name: "New query",
+    name: "Queries",
     templateName: "@xperience-community/sql-browser/EditQuery",
     order: UIPageOrder.First)]
 

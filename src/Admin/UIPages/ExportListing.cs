@@ -9,6 +9,10 @@ using XperienceCommunity.SqlBrowser.Services;
 
 namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
 
+/// <summary>
+/// Listing page which displays all files in the export folder.
+/// </summary>
+[UINavigation(true)]
 [UIEvaluatePermission(SystemPermissions.VIEW)]
 public class ExportListing(ISqlBrowserExporter sqlBrowserExporter) : DataContainerListingPage
 {
@@ -31,13 +35,16 @@ public class ExportListing(ISqlBrowserExporter sqlBrowserExporter) : DataContain
                 loadedExternally: true,
                 sortable: false);
         PageConfiguration.ColumnConfigurations.AddColumn(ROW_IDENTIFIER_COLUMN, "Name");
-        PageConfiguration.ColumnConfigurations.AddColumn(FILESIZE_COLUMN, "Size (KB)");
+        PageConfiguration.ColumnConfigurations.AddColumn(FILESIZE_COLUMN, "Size (KB)", minWidth: 120);
         PageConfiguration.TableActions.AddDeleteAction(nameof(DeleteExport));
 
         await base.ConfigurePage();
     }
 
 
+    /// <summary>
+    /// Deletes an export file.
+    /// </summary>
     [PageCommand]
     public Task<ICommandResponse<RowActionResult>> DeleteExport(string fileName)
     {
@@ -54,6 +61,9 @@ public class ExportListing(ISqlBrowserExporter sqlBrowserExporter) : DataContain
     }
 
 
+    /// <summary>
+    /// Gets the Base64 data of an export file.
+    /// </summary>
     [PageCommand]
     public async Task<ICommandResponse<string>> GetBase64String(string fileName)
     {

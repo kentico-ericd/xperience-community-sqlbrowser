@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { Button, ButtonColor, ButtonSize } from '@kentico/xperience-admin-components';
 import { usePageCommandProvider } from '@kentico/xperience-admin-base';
 
+/** Copy of C# DownloadExportClientProperties class. */
 interface DownloadExportClientProperties {
     fileName: string;
 }
@@ -9,6 +10,9 @@ interface DownloadExportClientProperties {
 export const DownloadExportTableCellComponent = (props: DownloadExportClientProperties) => {
     const { executeCommand } = usePageCommandProvider();
 
+    /**
+     * Click handler for export download button.
+     */
     const handleExportDownload = useCallback(async () => {
         const base64 = await executeCommand<string, string>("GetBase64String", props.fileName);
         const linkOptions = {

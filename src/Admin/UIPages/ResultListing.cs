@@ -42,7 +42,6 @@ public class ResultListing(
             var exportPermission = await permissionEvaluator.Evaluate(SqlBrowserApplicationPage.EXPORT_PERMISSION);
             if (exportPermission.Succeeded)
             {
-                PageConfiguration.HeaderActions.AddLink<ExportListing>("Exported data");
                 PageConfiguration.HeaderActions.AddCommand("Export to CSV", nameof(ExportToCsv));
                 PageConfiguration.HeaderActions.AddCommand("Export to Excel", nameof(ExportToXls));
                 PageConfiguration.HeaderActions.AddCommand("Export to JSON", nameof(ExportToJson));
