@@ -30,8 +30,24 @@ public class ExportListing(ISqlBrowserExporter sqlBrowserExporter) : DataContain
                     },
                 loadedExternally: true,
                 sortable: false);
+        PageConfiguration.TableActions.AddDeleteAction(nameof(DeleteExport));
 
         await base.ConfigurePage();
+    }
+
+    [PageCommand]
+    public Task<ICommandResponse<RowActionResult>> DeleteExport(string fileName)
+    {
+        string exportDirectory = sqlBrowserExporter.GetExportDirectory();
+        string fullPath = Path.Combine(exportDirectory, fileName);
+        if (!File.Exists(fullPath))
+        {
+            return Task.FromResult(ResponseFrom(new RowActionResult(false)).AddErrorMessage("File not found!"));
+        }
+
+        File.Delete(fullPath);
+
+        return Task.FromResult(ResponseFrom(new RowActionResult(true)).AddSuccessMessage("File deleted."));
     }
 
 
@@ -40,6 +56,11 @@ public class ExportListing(ISqlBrowserExporter sqlBrowserExporter) : DataContain
     {
         string exportDirectory = sqlBrowserExporter.GetExportDirectory();
         string fullPath = Path.Combine(exportDirectory, fileName);
+        if (!File.Exists(fullPath))
+        {
+            throw new FileNotFoundException("Export file not found.", fileName);
+        }
+
         byte[] bytes = await File.ReadAllBytesAsync(fullPath);
 
         return ResponseFrom(Convert.ToBase64String(bytes));
