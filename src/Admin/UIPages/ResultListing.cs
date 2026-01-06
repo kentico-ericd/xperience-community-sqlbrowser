@@ -5,6 +5,7 @@ using CMS.Membership;
 
 using Kentico.Xperience.Admin.Base;
 
+using XperienceCommunity.SqlBrowser.Admin.Models;
 using XperienceCommunity.SqlBrowser.Enum;
 using XperienceCommunity.SqlBrowser.Services;
 
@@ -42,9 +43,12 @@ public class ResultListing(
             var exportPermission = await permissionEvaluator.Evaluate(SqlBrowserApplicationPage.EXPORT_PERMISSION);
             if (exportPermission.Succeeded)
             {
-                PageConfiguration.HeaderActions.AddCommand("Export to CSV", nameof(ExportToCsv));
-                PageConfiguration.HeaderActions.AddCommand("Export to Excel", nameof(ExportToXls));
-                PageConfiguration.HeaderActions.AddCommand("Export to JSON", nameof(ExportToJson));
+                PageConfiguration.HeaderActions.AddCommandWithConfirmation(
+                    "Export",
+                    nameof(Export),
+                    "Choose export type",
+                    "Export",
+                    confirmationModel: typeof(ExportConfirmationDialogModel));
             }
 
             PageConfiguration.AddEditRowAction<ViewRecord>();
@@ -55,15 +59,39 @@ public class ResultListing(
 
 
     [PageCommand(Permission = SqlBrowserApplicationPage.EXPORT_PERMISSION)]
-    public Task<ICommandResponse> ExportToCsv() => Export(SqlBrowserExportType.Csv);
+    public async Task<ICommandResponse> Export(ExportConfirmationDialogModel model)
+    {
+        string? exportedPath = null;
+        var exportType = model.ExportType?.ToLower() switch
+        {
+            "csv" => SqlBrowserExportType.Csv,
+            "excel" => SqlBrowserExportType.Excel,
+            "json" => SqlBrowserExportType.Json,
+            _ => SqlBrowserExportType.None
+        };
+        if (exportType == SqlBrowserExportType.None)
+        {
+            return Response().AddSuccessMessage($"Invalid export type.");
+        }
 
+        try
+        {
+            exportedPath = await sqlBrowserExporter.Export(exportType, model.FileName);
+        }
+        catch (Exception ex)
+        {
+            eventLogService.LogException(nameof(ResultListing), nameof(Export), ex);
+        }
 
-    [PageCommand(Permission = SqlBrowserApplicationPage.EXPORT_PERMISSION)]
-    public Task<ICommandResponse> ExportToXls() => Export(SqlBrowserExportType.Excel);
-
-
-    [PageCommand(Permission = SqlBrowserApplicationPage.EXPORT_PERMISSION)]
-    public Task<ICommandResponse> ExportToJson() => Export(SqlBrowserExportType.Json);
+        if (!string.IsNullOrEmpty(exportedPath))
+        {
+            return Response().AddSuccessMessage($"Exported results to {exportedPath}");
+        }
+        else
+        {
+            return Response().AddErrorMessage("Export failed, please check the Event log for errors");
+        }
+    }
 
 
     protected override object GetIdentifier(IDataContainer dataContainer) =>
@@ -82,36 +110,6 @@ public class ResultListing(
         foreach (string col in columnNames)
         {
             PageConfiguration.ColumnConfigurations.AddColumn(col, col, minWidth: columnMinWidth);
-        }
-    }
-
-
-    private async Task<ICommandResponse> Export(SqlBrowserExportType exportType)
-    {
-        string? exportedPath = null;
-
-        try
-        {
-            exportedPath = exportType switch
-            {
-                SqlBrowserExportType.Csv => await sqlBrowserExporter.ExportToCsv(),
-                SqlBrowserExportType.Excel => await sqlBrowserExporter.ExportToXls(),
-                SqlBrowserExportType.Json => await sqlBrowserExporter.ExportToJson(),
-                _ => string.Empty
-            };
-        }
-        catch (Exception ex)
-        {
-            eventLogService.LogException(nameof(ResultListing), nameof(Export), ex);
-        }
-
-        if (!string.IsNullOrEmpty(exportedPath))
-        {
-            return Response().AddSuccessMessage($"Exported results to {exportedPath}");
-        }
-        else
-        {
-            return Response().AddErrorMessage("Export failed, please check the Event log for errors");
         }
     }
 }

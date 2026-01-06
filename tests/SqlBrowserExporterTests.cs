@@ -15,6 +15,7 @@ using NPOI.SS.UserModel;
 using NSubstitute;
 
 using XperienceCommunity.SqlBrowser.Services;
+using XperienceCommunity.SqlBrowser.Enum;
 
 namespace XperienceCommunity.SqlBrowser.Tests;
 
@@ -68,9 +69,28 @@ public class SqlBrowserExporterTests
 
 
     [Test]
-    public async Task ExportToCsv_WritesFileWithData()
+    public async Task Export_InvalidType_Throws() =>
+        Assert.ThrowsAsync<InvalidOperationException>(() => exporter.Export(SqlBrowserExportType.None));
+
+
+    [Test]
+    public async Task Export_CustomName_CreatesFileWithName()
     {
-        string path = await exporter.ExportToCsv();
+        string fileName = "my-file-name";
+        string path = await exporter.Export(SqlBrowserExportType.Csv, fileName);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(File.Exists(path));
+            Assert.That(path, Does.EndWith($"{fileName}.csv"));
+        });
+    }
+
+
+    [Test]
+    public async Task Export_Csv_WritesFileWithData()
+    {
+        string path = await exporter.Export(SqlBrowserExportType.Csv);
 
         string name1, name2;
         using (TextReader fileReader = File.OpenText(path))
@@ -92,9 +112,9 @@ public class SqlBrowserExporterTests
 
 
     [Test]
-    public async Task ExportToJson_WritesFileWithData()
+    public async Task Export_Json_WritesFileWithData()
     {
-        string path = await exporter.ExportToJson();
+        string path = await exporter.Export(SqlBrowserExportType.Json);
 
         string contents = await File.ReadAllTextAsync(path, Encoding.UTF8);
         var json = JsonConvert.DeserializeObject<JArray>(contents);
@@ -112,9 +132,9 @@ public class SqlBrowserExporterTests
 
 
     [Test]
-    public async Task ExportToXls_WritesFileWithData()
+    public async Task Export_Xls_WritesFileWithData()
     {
-        string path = await exporter.ExportToXls();
+        string path = await exporter.Export(SqlBrowserExportType.Excel);
 
         IWorkbook workbook;
         using (var file = new FileStream(path, FileMode.Open, FileAccess.Read))

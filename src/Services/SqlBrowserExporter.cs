@@ -9,6 +9,8 @@ using NPOI.XSSF.UserModel;
 
 using System.Globalization;
 
+using XperienceCommunity.SqlBrowser.Enum;
+
 namespace XperienceCommunity.SqlBrowser.Services;
 
 /// <summary>
@@ -19,56 +21,76 @@ public class SqlBrowserExporter(ISqlBrowserResultProvider sqlBrowserResultProvid
     private const string EXPORT_DIRECTORY = "App_Data\\Export";
 
 
-    public async Task<string> ExportToCsv()
+    public async Task<string> Export(SqlBrowserExportType exportType, string? fileName = null)
     {
-        string path = GetExportPath(".csv");
-        var dynamics = await sqlBrowserResultProvider.GetRowsAsDynamic();
-        using (var writer = new StreamWriter(path))
-        using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+        string path = GetExportPath(exportType, fileName);
+        switch (exportType)
         {
-            await csv.WriteRecordsAsync(dynamics);
+            case SqlBrowserExportType.Excel:
+                await ExportToXls(path);
+                break;
+            case SqlBrowserExportType.Csv:
+                await ExportToCsv(path);
+                break;
+            case SqlBrowserExportType.Json:
+                await ExportToJson(path);
+                break;
+            default:
+            case SqlBrowserExportType.None:
+                throw new InvalidOperationException();
         }
 
         return path;
     }
 
 
-    public async Task<string> ExportToJson()
+    private async Task ExportToCsv(string path)
     {
-        string path = GetExportPath(".json");
+        var dynamics = await sqlBrowserResultProvider.GetRowsAsDynamic();
+        using var writer = new StreamWriter(path);
+        using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+        await csv.WriteRecordsAsync(dynamics);
+    }
+
+
+    private async Task ExportToJson(string path)
+    {
         var dynamics = await sqlBrowserResultProvider.GetRowsAsDynamic();
         string jsonText = JsonConvert.SerializeObject(dynamics);
         await File.WriteAllTextAsync(path, jsonText);
-
-        return path;
     }
 
 
-    public async Task<string> ExportToXls()
+    private async Task ExportToXls(string path)
     {
-        string path = GetExportPath(".xlsx");
         var workbook = await GetWorkbook();
-        using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write))
-        {
-            workbook.Write(fs);
-        }
-
-        return path;
+        using var fs = new FileStream(path, FileMode.Create, FileAccess.Write);
+        workbook.Write(fs);
     }
+
 
     public string GetExportDirectory() => Path.Combine(SystemContext.WebApplicationPhysicalPath, EXPORT_DIRECTORY);
 
 
-    private string GetExportPath(string extension)
+    private string GetExportPath(SqlBrowserExportType exportType, string? fileName)
     {
-        string fileName = DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + extension;
+        string extension = exportType switch
+        {
+            SqlBrowserExportType.Csv => ".csv",
+            SqlBrowserExportType.Excel => ".xlsx",
+            SqlBrowserExportType.Json => ".json",
+            SqlBrowserExportType.None => throw new InvalidOperationException(),
+            _ => throw new InvalidOperationException()
+        };
+
+        string fullName = (fileName ?? DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")) + extension;
         string folder = GetExportDirectory();
         if (!Directory.Exists(folder))
         {
             Directory.CreateDirectory(folder);
         }
 
-        return Path.Combine(folder, fileName);
+        return Path.Combine(folder, fullName);
     }
 
 
