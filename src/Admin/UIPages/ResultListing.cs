@@ -5,8 +5,8 @@ using CMS.Membership;
 
 using Kentico.Xperience.Admin.Base;
 
-using XperienceCommunity.SqlBrowser.Admin.Models;
 using XperienceCommunity.SqlBrowser.Enum;
+using XperienceCommunity.SqlBrowser.Models;
 using XperienceCommunity.SqlBrowser.Services;
 
 namespace XperienceCommunity.SqlBrowser.Admin.UIPages;

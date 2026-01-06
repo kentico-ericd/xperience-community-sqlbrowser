@@ -3,7 +3,7 @@ using Kentico.Xperience.Admin.Base.FormAnnotations;
 
 using XperienceCommunity.SqlBrowser.Enum;
 
-namespace XperienceCommunity.SqlBrowser.Admin.Models;
+namespace XperienceCommunity.SqlBrowser.Models;
 
 /// <summary>
 /// Represents the configuration of the SQL result export process, presented to the user in a confirmation dialog.
