@@ -5,6 +5,7 @@
 /// </summary>
 public enum SqlBrowserExportType
 {
+    None,
     Csv,
     Excel,
     Json
