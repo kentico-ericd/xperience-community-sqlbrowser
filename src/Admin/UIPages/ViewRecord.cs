@@ -1,12 +1,16 @@
-﻿using CMS.Helpers;
+﻿using System.Text.RegularExpressions;
+
+using CMS.Helpers;
 using CMS.Membership;
 
-using System.Text.RegularExpressions;
-
 using Kentico.Xperience.Admin.Base;
+using Kentico.Xperience.Admin.Base.FormAnnotations;
 using Kentico.Xperience.Admin.Base.Forms;
+using Kentico.Xperience.Admin.Base.Forms.Internal;
 
 using XperienceCommunity.SqlBrowser.Services;
+
+using static XperienceCommunity.SqlBrowser.Admin.UIPages.ViewRecord;
 
 namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
 
@@ -17,10 +21,13 @@ namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
 [UIBreadcrumbs(false)]
 [UIPageLocation(PageLocationEnum.Dialog)]
 [UIEvaluatePermission(SystemPermissions.VIEW)]
-public class ViewRecord(IFormDataBinder formDataBinder, ISqlBrowserResultProvider sqlBrowserResultProvider) : EditPageBase(formDataBinder)
+public class ViewRecord(
+    IFormDataBinder formDataBinder,
+    ISqlBrowserResultProvider sqlBrowserResultProvider,
+    IFormItemCollectionProvider formItemCollectionProvider) : ModelEditPage<SqlBrowserResultModel>(formItemCollectionProvider, formDataBinder)
 {
+    private SqlBrowserResultModel? model;
     private const string EOL_REPLACEMENT = "#EOL#";
-    private readonly Regex newLineRegex = RegexHelper.GetRegex(@"(<br[ ]?/>)|([\r]?\n)");
 
 
     /// <summary>
@@ -30,43 +37,38 @@ public class ViewRecord(IFormDataBinder formDataBinder, ISqlBrowserResultProvide
     public int RecordId { get; set; }
 
 
+    protected override SqlBrowserResultModel Model => model ??= new();
+
+
     public override async Task ConfigurePage()
     {
         PageConfiguration.EditMode = FormEditMode.Disabled;
         PageConfiguration.SubmitConfiguration.Visible = false;
 
+        string text = await sqlBrowserResultProvider.GetRowAsText(RecordId);
+        var newLineRegex = RegexHelper.GetRegex(@"(<br[ ]?/>)|([\r]?\n)");
+        text = newLineRegex.Replace(text, EOL_REPLACEMENT);
+        Model.RowText = HTMLHelper.HTMLEncode(text).Replace(EOL_REPLACEMENT, "<br />");
+
         await base.ConfigurePage();
     }
 
 
-    public override async Task<EditTemplateClientProperties> ConfigureTemplateProperties(EditTemplateClientProperties properties)
+    protected override async Task<ICollection<IFormItem>> GetFormItems()
     {
-        string text = await sqlBrowserResultProvider.GetRowAsText(RecordId);
-        text = newLineRegex.Replace(text, EOL_REPLACEMENT);
-        properties.Items = [
-            new TextWithLabelClientProperties()
-            {
-                ValueAsHtml = true,
-                EditMode = FormEditMode.Disabled,
-                ComponentName = "@kentico/xperience-admin-base/TextWithLabel",
-                Value = HTMLHelper.HTMLEncode(text).Replace(EOL_REPLACEMENT, "<br />"),
-            }
-        ];
+        var formItems = await base.GetFormItems();
+        var rowTextItem = formItems
+            .OfType<TextWithLabelComponent>()
+            .FirstOrDefault(c => c.Name == nameof(SqlBrowserResultModel.RowText));
+        rowTextItem?.Properties.ValueAsHtml = true;
 
-        return properties;
+        return formItems;
     }
 
 
-    protected override Task<ICollection<IFormItem>> GetFormItems() =>
-        Task.FromResult<ICollection<IFormItem>>([]);
-
-
-    protected override Task<IEnumerable<IFormItemClientProperties>> GetFormItemsClientProperties() =>
-        Task.FromResult<IEnumerable<IFormItemClientProperties>>([]);
-
-
-    protected override Task<ICommandResponse> SubmitInternal(
-        FormSubmissionCommandArguments args,
-        ICollection<IFormItem> items,
-        IFormFieldValueProvider formFieldValueProvider) => throw new NotImplementedException();
+    public class SqlBrowserResultModel
+    {
+        [TextWithLabelComponent]
+        public string? RowText { get; set; }
+    }
 }
