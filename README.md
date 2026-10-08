@@ -5,7 +5,7 @@
 
 ## Description
 
-This new module found in the **Development** category allows users to execute SQL queries within the administration UI and view the results in a table. SQL results can be exported to common file types, and result rows can be clicked for a detailed view.
+This new module found in the **Development** category allows users to execute SQL queries within the administration UI and view the results in a table. SQL results can be exported to a CSV file, and result rows can be clicked for a detailed view.
 
 ## Library Version Matrix
 
@@ -14,6 +14,7 @@ This new module found in the **Development** category allows users to execute SQ
 | >= 29.0.0         | < 3.0.0         |
 | >= 30.6.0         | >= 3.0.1        |
 | >= 30.11.2        | >= 4.0.0        |
+| >= 31.9.0         | >= 6.0.0        |
 
 ## :gear: Package Installation
 
