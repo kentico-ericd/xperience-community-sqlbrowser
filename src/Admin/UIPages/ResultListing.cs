@@ -1,12 +1,9 @@
 ﻿using CMS.Base;
-using CMS.Core;
 using CMS.Helpers;
 using CMS.Membership;
 
 using Kentico.Xperience.Admin.Base;
 
-using XperienceCommunity.SqlBrowser.Enum;
-using XperienceCommunity.SqlBrowser.Models;
 using XperienceCommunity.SqlBrowser.Services;
 
 namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
@@ -18,8 +15,6 @@ namespace XperienceCommunity.SqlBrowser.Admin.UIPages;
 [UIEvaluatePermission(SystemPermissions.VIEW)]
 public class ResultListing(
     ISqlBrowserResultProvider sqlBrowserQueryProvider,
-    ISqlBrowserExporter sqlBrowserExporter,
-    IEventLogService eventLogService,
     IUIPermissionEvaluator permissionEvaluator) : DataContainerListingPage
 {
     public override async Task ConfigurePage()
@@ -40,57 +35,19 @@ public class ResultListing(
         {
             ConfigureColumns();
             PageConfiguration.Caption = $"Results ({recordCount})";
+            PageConfiguration.AddEditRowAction<ViewRecord>();
+
             var exportPermission = await permissionEvaluator.Evaluate(SqlBrowserApplicationPage.EXPORT_PERMISSION);
             if (exportPermission.Succeeded)
             {
-                PageConfiguration.HeaderActions.AddCommandWithConfirmation(
-                    "Export",
-                    nameof(Export),
-                    "Choose export type",
-                    "Export",
-                    confirmationModel: typeof(ExportConfirmationDialogModel));
+                PageConfiguration.EnableExport(new ListingExportConfiguration
+                {
+                    FileName = $"SqlBrowser_{DateTime.Now:yyyyMMdd_HHmmss}.csv"
+                });
             }
-
-            PageConfiguration.AddEditRowAction<ViewRecord>();
         }
 
         await base.ConfigurePage();
-    }
-
-
-    [PageCommand(Permission = SqlBrowserApplicationPage.EXPORT_PERMISSION)]
-    public async Task<ICommandResponse> Export(ExportConfirmationDialogModel model)
-    {
-        string? exportedPath = null;
-        var exportType = model.ExportType?.ToLower() switch
-        {
-            "csv" => SqlBrowserExportType.Csv,
-            "excel" => SqlBrowserExportType.Excel,
-            "json" => SqlBrowserExportType.Json,
-            _ => SqlBrowserExportType.None
-        };
-        if (exportType == SqlBrowserExportType.None)
-        {
-            return Response().AddSuccessMessage($"Invalid export type.");
-        }
-
-        try
-        {
-            exportedPath = await sqlBrowserExporter.Export(exportType, model.FileName);
-        }
-        catch (Exception ex)
-        {
-            eventLogService.LogException(nameof(ResultListing), nameof(Export), ex);
-        }
-
-        if (!string.IsNullOrEmpty(exportedPath))
-        {
-            return Response().AddSuccessMessage($"Exported results to {exportedPath}");
-        }
-        else
-        {
-            return Response().AddErrorMessage("Export failed, please check the Event log for errors");
-        }
     }
 
 

@@ -40,11 +40,7 @@ The results of your query will be displayed in a table. Click on an individual r
 
 ## Exporting results
 
-After executing a query, click the **Export** button in the listing header to export the results to the server's ~/App_Data/Export folder. A dialog will appear allowing you to choose the export type (CSV, Excel, or JSON) and the file name. If the file name is empty, one will be automatically generated based on the current date and time:
-
-![Export confirmation](/images/confirmation.png)
-
-To view the contents of the export, click the **Exported data** navigation item in the side menu. Here, you can download individual export files to your local machine, or delete the files from the server.
+After executing a query, click the **Export** button in the listing header to save the results of the query as a CSV file. The Export button will only appear to users with the "Export" [permission](https://docs.kentico.com/documentation/developers-and-admins/configuration/users/role-management) for the application, and administrators.
 
 ## Saving queries
 
