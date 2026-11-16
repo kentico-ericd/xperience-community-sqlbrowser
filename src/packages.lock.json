@@ -2,12 +2,6 @@
   "version": 2,
   "dependencies": {
     "net8.0": {
-      "CsvHelper": {
-        "type": "Direct",
-        "requested": "[33.0.1, )",
-        "resolved": "33.0.1",
-        "contentHash": "fev4lynklAU2A9GVMLtwarkwaanjSYB4wUqO2nOJX5hnzObORzUqVLe+bDYCUyIIRQM4o5Bsq3CcyJR89iMmEQ=="
-      },
       "Kentico.Xperience.Admin": {
         "type": "Direct",
         "requested": "[31.9.0, )",
@@ -47,25 +41,6 @@
         "requested": "[170.53.0, )",
         "resolved": "170.53.0",
         "contentHash": "Ls8Pk590C9e6+f1PgbZ4QHPIjLAoxWf5JEVY+BDtO0XSMwJsfrlG/K1wx7oIdXt1Ry9n9DvXQb4P9WmDj4GmGg=="
-      },
-      "NPOI": {
-        "type": "Direct",
-        "requested": "[2.7.1, )",
-        "resolved": "2.7.1",
-        "contentHash": "Ho29P+Kl6jye33X999o/qP9lqNDtpSQM/OnbdAcGhFBRpa30aqtMo+iNqa/EJFvZrQCo0z98drrCzCgGfjo3uA==",
-        "dependencies": {
-          "BouncyCastle.Cryptography": "2.3.1",
-          "Enums.NET": "4.0.1",
-          "ExtendedNumerics.BigDecimal": "2025.1001.2.129",
-          "MathNet.Numerics.Signed": "5.0.0",
-          "Microsoft.IO.RecyclableMemoryStream": "3.0.0",
-          "SharpZipLib": "1.4.2",
-          "SixLabors.Fonts": "1.0.1",
-          "SixLabors.ImageSharp": "2.1.8",
-          "System.Configuration.ConfigurationManager": "6.0.0",
-          "System.Security.Cryptography.Pkcs": "6.0.3",
-          "System.Security.Cryptography.Xml": "6.0.1"
-        }
       },
       "SonarAnalyzer.CSharp": {
         "type": "Direct",
@@ -122,16 +97,6 @@
         "type": "Transitive",
         "resolved": "2.9.1",
         "contentHash": "OE0sl1/sQ37bjVsPKKtwQlWDgqaxWgtme3xZz7JssWUzg5JpMIyHgCTY9MVMxOg48fJ1AgGT3tgdH5m/kQ5xhA=="
-      },
-      "Enums.NET": {
-        "type": "Transitive",
-        "resolved": "4.0.1",
-        "contentHash": "OUGCd5L8zHZ61GAf436G0gf/H6yrSUkEpV5vm2CbCUuz9Rx7iLFLP5iHSSfmOtqNpuyo4vYte0CvYEmPZXRmRQ=="
-      },
-      "ExtendedNumerics.BigDecimal": {
-        "type": "Transitive",
-        "resolved": "2025.1001.2.129",
-        "contentHash": "+woGT1lsBtwkntOpx2EZbdbySv0aWPefE0vrfvclxVdbi4oa2bbtphFPWgMiQe+kRCPICbfFJwp6w1DuR7Ge2Q=="
       },
       "Google.Protobuf": {
         "type": "Transitive",
@@ -542,11 +507,6 @@
           "MimeKit": "4.18.0",
           "System.Formats.Asn1": "10.0.0"
         }
-      },
-      "MathNet.Numerics.Signed": {
-        "type": "Transitive",
-        "resolved": "5.0.0",
-        "contentHash": "PSrHBVMf41SjbhlnpOMnoir8YgkyEJ6/nwxvjYpH+vJCexNcx2ms6zRww5yLVqLet1xLJgZ39swtKRTLhWdnAw=="
       },
       "Microsoft.Agents.AI": {
         "type": "Transitive",
@@ -1013,11 +973,6 @@
           "Microsoft.IdentityModel.Logging": "8.16.0"
         }
       },
-      "Microsoft.IO.RecyclableMemoryStream": {
-        "type": "Transitive",
-        "resolved": "3.0.0",
-        "contentHash": "irv0HuqoH8Ig5i2fO+8dmDNdFdsrO+DoQcedwIlb810qpZHBNQHZLW7C/AHBQDgLLpw2T96vmMAy/aE4Yj55Sg=="
-      },
       "Microsoft.ML.Tokenizers": {
         "type": "Transitive",
         "resolved": "2.0.0",
@@ -1025,11 +980,6 @@
         "dependencies": {
           "Google.Protobuf": "3.30.2"
         }
-      },
-      "Microsoft.NETCore.Platforms": {
-        "type": "Transitive",
-        "resolved": "5.0.0",
-        "contentHash": "VyPlqzH2wavqquTcYpkIIAQ6WdenuKoFN0BdYBbCWsclXacSOHNQn66Gt4z5NBqEYW0FAPm5rlvki9ZiCij5xQ=="
       },
       "Microsoft.SqlServer.Server": {
         "type": "Transitive",
@@ -1098,25 +1048,6 @@
         "contentHash": "4ef2AoeNdBHrKoMU6t04dxTQ72TXsNO3RfWU1YN5jaJjCIrQhvNo9nhfO+6z+j7UBZNadsdN2d4rzAFO27xUnw==",
         "dependencies": {
           "AngleSharp": "1.5.2"
-        }
-      },
-      "SharpZipLib": {
-        "type": "Transitive",
-        "resolved": "1.4.2",
-        "contentHash": "yjj+3zgz8zgXpiiC3ZdF/iyTBbz2fFvMxZFEBPUcwZjIvXOf37Ylm+K58hqMfIBt5JgU/Z2uoUS67JmTLe973A=="
-      },
-      "SixLabors.Fonts": {
-        "type": "Transitive",
-        "resolved": "1.0.1",
-        "contentHash": "ljezRHWc7N0azdQViib7Aa5v+DagRVkKI2/93kEbtjVczLs+yTkSq6gtGmvOcx4IqyNbO3GjLt7SAQTpLkySNw=="
-      },
-      "SixLabors.ImageSharp": {
-        "type": "Transitive",
-        "resolved": "2.1.8",
-        "contentHash": "ML1++vactR5xMW36wHA2nAX3vc6VpR62qYnpopQdLNGbP8BAJ/ckv1IrGIIFRUEQ0JS9EgWr1y1gEa/81f+HaA==",
-        "dependencies": {
-          "System.Runtime.CompilerServices.Unsafe": "5.0.0",
-          "System.Text.Encoding.CodePages": "5.0.0"
         }
       },
       "System.ClientModel": {
@@ -1199,16 +1130,6 @@
         "resolved": "10.0.12",
         "contentHash": "17brFrnQHV/XMMazXNqFq4GkvzWy8yzDPo5Gb8TT8zJtMFbUqDycOCyPCp9F+eMc4L75kcCKRZqaeBHMwLCL9Q=="
       },
-      "System.Runtime.CompilerServices.Unsafe": {
-        "type": "Transitive",
-        "resolved": "5.0.0",
-        "contentHash": "ZD9TMpsmYJLrxbbmdvhwt9YEgG5WntEnZ/d1eH8JBX9LBp+Ju8BSBhUGbZMNVHHomWo2KVImJhTDl2hIgw/6MA=="
-      },
-      "System.Security.AccessControl": {
-        "type": "Transitive",
-        "resolved": "6.0.0",
-        "contentHash": "AUADIc0LIEQe7MzC+I0cl0rAT8RrTAKFHl53yHjEUzNVIaUlhFY11vc2ebiVJzVBuOzun6F7FBA+8KAbGTTedQ=="
-      },
       "System.Security.Cryptography.Pkcs": {
         "type": "Transitive",
         "resolved": "10.0.0",
@@ -1222,23 +1143,6 @@
         "type": "Transitive",
         "resolved": "8.0.0",
         "contentHash": "+TUFINV2q2ifyXauQXRwy4CiBhqvDEDZeVJU7qfxya4aRYOKzVBpN+4acx25VcPB9ywUN6C0n8drWl110PhZEg=="
-      },
-      "System.Security.Cryptography.Xml": {
-        "type": "Transitive",
-        "resolved": "6.0.1",
-        "contentHash": "5e5bI28T0x73AwTsbuFP4qSRzthmU2C0Gqgg3AZ3KTxmSyA+Uhk31puA3srdaeWaacVnHhLdJywCzqOiEpbO/w==",
-        "dependencies": {
-          "System.Security.AccessControl": "6.0.0",
-          "System.Security.Cryptography.Pkcs": "6.0.1"
-        }
-      },
-      "System.Text.Encoding.CodePages": {
-        "type": "Transitive",
-        "resolved": "5.0.0",
-        "contentHash": "NyscU59xX6Uo91qvhOs2Ccho3AR2TnZPomo1Z0K6YpyztBPM/A5VbkzOO19sy3A3i1TtEnTxA7bCe3Us+r5MWg==",
-        "dependencies": {
-          "Microsoft.NETCore.Platforms": "5.0.0"
-        }
       },
       "System.Text.Encodings.Web": {
         "type": "Transitive",

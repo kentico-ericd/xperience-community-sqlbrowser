@@ -6,10 +6,8 @@
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="CsvHelper" Version="33.0.1" />
     <PackageVersion Include="Kentico.Xperience.Admin" Version="31.9.0" />
     <PackageVersion Include="Kentico.Xperience.WebApp" Version="31.9.0" />
-    <PackageVersion Include="NPOI" Version="2.7.1" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="9.6.0.74858" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="Microsoft.SqlServer.TransactSql.ScriptDom" Version="170.53.0" />
